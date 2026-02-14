@@ -39,29 +39,3 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Push notification handling
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Home Strategy';
-  const options = {
-    body: data.body || '',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    data: data.url || '/home',
-  };
-  event.waitUntil(self.registration.showNotification(title, options));
-});
-
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((windowClients) => {
-      for (const client of windowClients) {
-        if (client.url.includes('/home') && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      return clients.openWindow(event.notification.data || '/home');
-    })
-  );
-});

@@ -3,11 +3,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { useState, useRef, useEffect } from "react";
 
-interface Props {
-  onOpenSettings?: () => void;
-}
-
-export function UserMenu({ onOpenSettings }: Props = {}) {
+export function UserMenu() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -54,15 +50,6 @@ export function UserMenu({ onOpenSettings }: Props = {}) {
             </p>
             <p className="text-[11px] text-muted truncate">{session.user.email}</p>
           </div>
-          <button
-            onClick={() => {
-              setIsOpen(false);
-              onOpenSettings?.();
-            }}
-            className="w-full px-3.5 py-2 text-left text-[13px] text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
-          >
-            Configuracoes
-          </button>
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
             className="w-full px-3.5 py-2 text-left text-[13px] text-muted hover:text-foreground hover:bg-surface-hover transition-colors"

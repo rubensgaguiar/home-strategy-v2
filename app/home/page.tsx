@@ -19,7 +19,6 @@ import { BacklogView } from '@/components/backlog-view';
 import { Fab } from '@/components/fab';
 import { TaskCreateModal } from '@/components/task-create-modal';
 import { TaskEditModal } from '@/components/task-edit-modal';
-import { SettingsView } from '@/components/settings-view';
 import { DashboardView } from '@/components/dashboard-view';
 
 const authDisabled = process.env.NEXT_PUBLIC_AUTH_DISABLED === 'true';
@@ -69,7 +68,6 @@ export default function HomePage() {
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskComplete | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
 
   // API-backed data
   const { tasks, isLoading: tasksLoading, refetch } = useTasks();
@@ -142,7 +140,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {!authDisabled && <UserMenu onOpenSettings={() => setShowSettings(true)} />}
+            {!authDisabled && <UserMenu />}
           </div>
         </div>
 
@@ -415,11 +413,6 @@ export default function HomePage() {
         onUpdated={refetch}
         onDeleted={refetch}
       />
-      <SettingsView
-        open={showSettings}
-        onClose={() => setShowSettings(false)}
-      />
-
       {/* ── Bottom Navigation ─────────────────────────────────── */}
       <nav className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-lg border-t border-border safe-bottom z-50">
         <div className="flex items-center justify-around max-w-lg mx-auto">

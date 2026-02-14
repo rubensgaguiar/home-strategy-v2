@@ -104,26 +104,6 @@ export const categoryContingencies = pgTable('category_contingencies', {
   planB: text('plan_b').notNull(),
 });
 
-export const pushSubscriptions = pgTable('push_subscriptions', {
-  id: serial('id').primaryKey(),
-  userEmail: text('user_email').notNull(),
-  endpoint: text('endpoint').notNull(),
-  p256dh: text('p256dh').notNull(),
-  auth: text('auth').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => [
-  index('push_subscriptions_email_idx').on(table.userEmail),
-  unique('push_subscriptions_endpoint_unique').on(table.endpoint),
-]);
-
-export const notificationPreferences = pgTable('notification_preferences', {
-  id: serial('id').primaryKey(),
-  userEmail: text('user_email').notNull().unique(),
-  enabled: boolean('enabled').default(false).notNull(),
-  periodStart: boolean('period_start').default(true).notNull(),
-  periodEnd: boolean('period_end').default(true).notNull(),
-  dailySummary: boolean('daily_summary').default(true).notNull(),
-});
 
 // ── Relations ──────────────────────────────────────────────────────
 
