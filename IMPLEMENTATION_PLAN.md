@@ -355,73 +355,17 @@ _Enable users to create, edit, and delete tasks through the UI. This is the core
 
 ## Phase 5 -- Backlog, Inbox & Protocols CRUD
 
-_Redesign the Backlog tab with filters, add Inbox functionality, and enable Protocol management._
+> **Status: COMPLETED** — All 9 items implemented. Key decisions: Backlog view shows ALL tasks (not just 'none' recurrence) with multi-select frequency and category filters, default excludes daily. Inbox section highlighted with amber styling when 'Sem data' filter is active. Person filter shared between Dia and Backlog tabs. Protocol CRUD uses slide-up drawer modal with color palette picker (8 colors) and action list with reorder/add/remove. Delete confirmation fetches and displays linked task count.
 
-- [ ] **5.1 Rename "Pendencias" tab to "Backlog"**
-  - Update tab label in bottom navigation from "Pendencias" to "Backlog"
-  - Update tab id from 'pendencias' to 'backlog'
-  - Files: `app/home/page.tsx`
-  - Ref: Spec 05
-
-- [ ] **5.2 Backlog: filter bar (frequency, category, person)**
-  - Sticky filter section at top of Backlog view
-  - Frequency filter: multi-select chips (Diaria, Semanal, Mensal, Anual, Sem data); default excludes "Diaria"
-  - Category filter: multi-select chips (all 7 categories)
-  - Person filter: select pills (Rubens, Diene, Juntos, Todos)
-  - Filters are combinable (AND between filter types, OR within a filter type)
-  - Persist filter preferences in localStorage
-  - Files: `components/backlog-view.tsx`, `components/backlog-filters.tsx`
-  - Ref: Spec 05
-
-- [ ] **5.3 Backlog: task list with frequency badges and indicators**
-  - Tasks grouped by category (keep current layout)
-  - Each task shows: name, frequency badge (descriptive text like "Seg/Qua/Sex", "Mensal dia 15", "Sem data"), person dot, "como" indicator (if steps exist), protocol indicator (if linked)
-  - Frequency badge styled differently per type (color-coded chips)
-  - Tasks without recurrence (Inbox) get a distinct "Sem data" badge in gray
-  - Files: `components/backlog-view.tsx`
-  - Ref: Spec 05
-
-- [ ] **5.4 Backlog: long press to edit + tap to expand**
-  - Long press on any task opens the task edit modal (reuse from Phase 3)
-  - Tap on a task expands details inline: steps, plan B, linked protocol
-  - Files: `components/backlog-view.tsx`
-  - Ref: Spec 05
-
-- [ ] **5.5 Inbox section in Backlog**
-  - When "Sem data" filter chip is active, show highlighted "Inbox" section at top (before category groups)
-  - Inbox tasks have an "Agendar" CTA button that opens the edit modal focused on recurrence configuration
-  - Visual distinction: slightly different background or border for inbox section
-  - Files: `components/backlog-view.tsx`
-  - Ref: Spec 05
-
-- [ ] **5.6 Inbox badge counter on Backlog tab**
-  - Bottom nav "Backlog" tab shows a small badge with count of inbox items (tasks with recurrence.type='none')
-  - Badge only visible when count > 0
-  - Updates when tasks are created or scheduled
-  - Files: `app/home/page.tsx`
-  - Ref: Spec 05
-
-- [ ] **5.7 Protocol CRUD in SOS view**
-  - Add pencil/edit icon button on each protocol card (top-right corner)
-  - Add "Novo protocolo" button at bottom of the protocol list
-  - Tapping edit opens Protocol edit modal; tapping "Novo" opens Protocol create modal
-  - Files: `components/emergency-view.tsx`
-  - Ref: Spec 07
-
-- [ ] **5.8 Protocol create/edit modal**
-  - Fields: name (text), trigger (textarea), actions (list of text inputs with add/remove/reorder), color (predefined palette picker: blue, amber, violet, emerald, red, pink, indigo, gray), icon (emoji text input, optional)
-  - Actions management: "+" to add, "X" to remove, minimum 1 action required, drag or up/down for reorder
-  - Color picker: grid of color circles, selected one gets ring/highlight
-  - Save: POST (create) or PUT (edit) /api/protocols
-  - Files: `components/protocol-form.tsx`, `components/protocol-modal.tsx`
-  - Ref: Spec 07
-
-- [ ] **5.9 Protocol deletion with linked-task warning**
-  - "Excluir" button inside protocol edit modal
-  - If protocol is linked to tasks: "Este protocolo esta vinculado a N tasks. Desvincular e excluir?"
-  - On confirm: DELETE /api/protocols/[id] (API sets protocol_id=null on linked tasks)
-  - Files: `components/protocol-modal.tsx`
-  - Ref: Spec 07
+- [x] **5.1** Renamed Pendencias tab to Backlog (`'pendencias'` -> `'backlog'`)
+- [x] **5.2** Backlog filter bar with frequency + category multi-select chips
+- [x] **5.3** Frequency badges using `describeRecurrence()` with color-coded chips
+- [x] **5.4** Long press to edit + tap to expand (steps, planB, protocol)
+- [x] **5.5** Inbox section with amber styling at top of Backlog
+- [x] **5.6** Inbox badge counter on Backlog tab in bottom nav
+- [x] **5.7** Protocol CRUD buttons in SOS view (edit + "Novo protocolo")
+- [x] **5.8** Protocol create/edit modal — `components/protocol-form.tsx`, `components/protocol-modal.tsx`
+- [x] **5.9** Protocol deletion with linked-task warning via ConfirmDialog
 
 ---
 

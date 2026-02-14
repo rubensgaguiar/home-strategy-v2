@@ -31,6 +31,7 @@ export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMark
   const [showPlanB, setShowPlanB] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
   const [browseIndex, setBrowseIndex] = useState(0);
+  const [transitionDir, setTransitionDir] = useState<'left' | 'right' | 'done' | 'not-done' | null>(null);
 
   const { queue, stats } = useMemo(() => {
     const currentPeriod = isToday ? getCurrentPeriod() : null;
@@ -93,6 +94,7 @@ export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMark
   const swipeHandlers = useSwipe({
     onSwipeLeft: () => {
       if (displayIndex < uncheckedItems.length - 1) {
+        setTransitionDir('left');
         setBrowseIndex(displayIndex + 1);
         setShowPlanB(false);
         setShowSteps(false);
@@ -100,6 +102,7 @@ export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMark
     },
     onSwipeRight: () => {
       if (displayIndex > 0) {
+        setTransitionDir('right');
         setBrowseIndex(displayIndex - 1);
         setShowPlanB(false);
         setShowSteps(false);
@@ -109,10 +112,10 @@ export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMark
 
   function handleDone() {
     if (!currentItem) return;
+    setTransitionDir('done');
     onMarkDone(currentItem.task.id);
     setShowPlanB(false);
     setShowSteps(false);
-    // Reset browse index if we're past the end
     if (displayIndex >= uncheckedItems.length - 1 && displayIndex > 0) {
       setBrowseIndex(displayIndex - 1);
     }
@@ -120,6 +123,7 @@ export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMark
 
   function handleNotDone() {
     if (!currentItem) return;
+    setTransitionDir('not-done');
     onMarkNotDone(currentItem.task.id);
     setShowPlanB(false);
     setShowSteps(false);
@@ -157,6 +161,11 @@ export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMark
   const hasSteps = task.steps && task.steps.length > 0;
   const hasProtocol = task.protocol !== null;
 
+  const cardAnimation = transitionDir === 'left' ? 'animate-slide-left'
+    : transitionDir === 'right' ? 'animate-slide-right'
+    : transitionDir === 'not-done' ? 'animate-shake'
+    : 'animate-slide-up';
+
   return (
     <div className="flex flex-col items-center animate-fade-in" key={`${task.id}-${displayIndex}`}>
       {/* Progress ring */}
@@ -168,7 +177,7 @@ export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMark
       </div>
 
       {/* Card */}
-      <div className="w-full bg-surface rounded-3xl border border-border shadow-sm overflow-hidden animate-slide-up" {...longPressHandlers} {...swipeHandlers}>
+      <div className={`w-full bg-surface rounded-3xl border border-border shadow-sm overflow-hidden ${cardAnimation}`} {...longPressHandlers} {...swipeHandlers}>
         {/* Period + badges */}
         <div className="px-5 pt-5 flex items-center gap-2 flex-wrap">
           <span className="text-[13px] leading-none">{periodInfo?.icon}</span>

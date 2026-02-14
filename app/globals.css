@@ -87,12 +87,33 @@ body {
   from { width: 0%; }
 }
 
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+
 .animate-fade-in { animation: fadeIn 300ms ease-out; }
 .animate-slide-up { animation: slideUp 300ms ease-out; }
 .animate-slide-down { animation: slideDown 200ms ease-out; }
 .animate-scale-in { animation: scaleIn 200ms ease-out; }
 .animate-check-pop { animation: checkPop 200ms ease-out; }
 .animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+.animate-slide-left { animation: slideLeft 250ms ease-out; }
+.animate-slide-right { animation: slideRight 250ms ease-out; }
+.animate-shake { animation: shake 300ms ease-out; }
 
 /* Stagger children animation */
 .stagger-children > * {
