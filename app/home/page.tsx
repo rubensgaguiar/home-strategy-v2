@@ -22,7 +22,7 @@ import { TaskEditModal } from '@/components/task-edit-modal';
 
 const authDisabled = process.env.NEXT_PUBLIC_AUTH_DISABLED === 'true';
 
-type Tab = 'dia' | 'emergencia' | 'pendencias';
+type Tab = 'dia' | 'emergencia' | 'backlog';
 type ViewMode = 'foco' | 'lista';
 type TimeScope = 'hoje' | 'semana' | 'mes';
 type PersonFilter = Person | 'todos';
@@ -117,6 +117,7 @@ export default function HomePage() {
 
   const progressPct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
   const personName = personFilter === 'rubens' ? 'Rubens' : personFilter === 'diene' ? 'Diene' : '';
+  const inboxCount = useMemo(() => tasks.filter((t) => t.recurrence.type === 'none').length, [tasks]);
 
   const handleEditTask = useCallback((task: TaskComplete) => {
     setEditingTask(task);
@@ -267,8 +268,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Controls (Person + View toggle) — only for day view ── */}
-      {activeTab === 'dia' && (
+      {/* ── Controls (Person + View toggle) ──────────────────── */}
+      {(activeTab === 'dia' || activeTab === 'backlog') && (
         <div className="px-5 py-2 flex items-center justify-between">
           {/* Person pills */}
           <div className="flex items-center gap-1">
@@ -389,7 +390,7 @@ export default function HomePage() {
         )}
 
         {activeTab === 'emergencia' && <EmergencyView />}
-        {activeTab === 'pendencias' && <BacklogView tasks={tasks} isLoading={tasksLoading} onEditTask={handleEditTask} />}
+        {activeTab === 'backlog' && <BacklogView tasks={tasks} isLoading={tasksLoading} person={personFilter} onEditTask={handleEditTask} />}
       </main>
 
       {/* ── FAB ─────────────────────────────────────────────── */}
@@ -426,7 +427,7 @@ export default function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             )},
-            { id: 'pendencias' as Tab, label: 'Backlog', icon: (active: boolean) => (
+            { id: 'backlog' as Tab, label: 'Backlog', icon: (active: boolean) => (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={active ? 2 : 1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
@@ -441,7 +442,14 @@ export default function HomePage() {
                   isActive ? 'text-accent' : 'text-muted'
                 }`}
               >
-                {tab.icon(isActive)}
+                <div className="relative">
+                  {tab.icon(isActive)}
+                  {tab.id === 'backlog' && inboxCount > 0 && (
+                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-[14px] rounded-full bg-red-500 text-white text-[8px] font-bold flex items-center justify-center px-0.5">
+                      {inboxCount}
+                    </span>
+                  )}
+                </div>
                 <span className="text-[10px] font-medium">{tab.label}</span>
               </button>
             );

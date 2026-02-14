@@ -340,80 +340,16 @@ _Enable users to create, edit, and delete tasks through the UI. This is the core
 
 ## Phase 4 -- Views & Navigation
 
-_Add new view modes (Week, Month) and enhance existing views with full interaction patterns._
+> **Status: COMPLETED** — All 8 items implemented. Key decisions: TimeScope type ('hoje'|'semana'|'mes') as state within the Dia tab, with week/month offset integers for temporal navigation. `getTasksForWeek` and `getTasksForMonth` made generic like `getTasksForDate` to preserve TaskComplete through filtering. FocusView swipe uses `browseIndex` state to navigate without recording done/not_done. "Ver protocolo" button shown inline (not modal) for simplicity.
 
-- [ ] **4.1 View switcher: Hoje / Semana / Mes toggle within Dia tab**
-  - Three-segment toggle or pill selector within the "Dia" tab
-  - States: 'hoje' (existing day views), 'semana' (new), 'mes' (new)
-  - When 'hoje': show existing Focus/Timeline toggle + day selector
-  - When 'semana': show WeekView
-  - When 'mes': show MonthView
-  - Person filter applies across all three sub-views
-  - Files: `app/home/page.tsx`
-  - Ref: Spec 04
-
-- [ ] **4.2 Temporal navigation for day view**
-  - Convert day selector from day-of-week to actual date-based navigation
-  - Show full week with actual dates (not just Mon-Sun labels)
-  - Left/right arrows to shift the displayed week
-  - "Hoje" indicator on current date
-  - Files: `app/home/page.tsx`
-  - Ref: Spec 04
-
-- [ ] **4.3 Week View (new)**
-  - Tasks grouped by day of week (Monday through Sunday) for the selected week
-  - Exclude daily tasks (only weekly, monthly, yearly tasks)
-  - Each day is a collapsible section with header showing day name + date + progress
-  - Within each day, tasks listed with period badge, person dot, completion checkbox (3-state)
-  - Week navigation: arrows to go to previous/next week
-  - "This week" indicator with today highlighted
-  - Long press on task opens edit modal
-  - Uses `getTasksForWeek()` resolution function
-  - Files: `components/week-view.tsx`
-  - Ref: Spec 04
-
-- [ ] **4.4 Month View (new)**
-  - Tasks grouped by day of month for the selected month
-  - Exclude daily and weekly tasks (only monthly, yearly tasks)
-  - Only show days that have tasks (skip empty days)
-  - Each day shows: day number, tasks with period + person + completion state
-  - Month navigation: arrows for previous/next month, header shows "Fevereiro 2026"
-  - Progress indicator for the month
-  - Long press on task opens edit modal
-  - Uses `getTasksForMonth()` resolution function
-  - Files: `components/month-view.tsx`
-  - Ref: Spec 04
-
-- [ ] **4.5 Focus View: swipe gestures for navigation**
-  - Detect touch events (touchstart, touchmove, touchend)
-  - 50px minimum threshold to register swipe
-  - Swipe right -> go to next task (skip, no state recorded)
-  - Swipe left -> go to previous task (skip, no state recorded)
-  - Visual feedback: card slides in swipe direction with fade
-  - Also support mouse drag on desktop
-  - Slide + fade animation (200-300ms, ease-out)
-  - Files: `components/focus-view.tsx`, `lib/hooks/use-swipe.ts`
-  - Ref: Spec 04, Spec 06
-
-- [ ] **4.6 Focus View: "Como fazer" section**
-  - If task has steps (task_steps), show expandable "Como fazer" section on the card
-  - Collapsible, similar to existing Plan B section
-  - Shows numbered list of steps (display-only, no checkboxes)
-  - Files: `components/focus-view.tsx`
-  - Ref: Spec 04
-
-- [ ] **4.7 Focus View: "Ver protocolo" button**
-  - If task has linked protocol (protocol_id is not null), show "Ver protocolo de emergencia" button
-  - Button opens a modal showing the protocol: name, trigger, actions (numbered), styled with protocol color
-  - Files: `components/focus-view.tsx`, `components/protocol-modal.tsx`
-  - Ref: Spec 04, Spec 07
-
-- [ ] **4.8 Timeline View: "como" indicator**
-  - Small icon/badge next to task name if the task has steps (task_steps.length > 0)
-  - Visual hint that there are instructions available
-  - Tapping the indicator could expand steps inline (optional)
-  - Files: `components/timeline-view.tsx`
-  - Ref: Spec 04
+- [x] **4.1 View switcher: Hoje / Semana / Mes toggle within Dia tab**
+- [x] **4.2 Temporal navigation for day view** — Week/month arrows with offset-based navigation
+- [x] **4.3 Week View (new)** — `components/week-view.tsx` with per-day completion sections
+- [x] **4.4 Month View (new)** — `components/month-view.tsx` with `getTasksForMonth()`
+- [x] **4.5 Focus View: swipe gestures** — `lib/hooks/use-swipe.ts` + browseIndex
+- [x] **4.6 Focus View: "Como fazer" section** — expandable numbered steps list
+- [x] **4.7 Focus View: "Ver protocolo" button** — shown when task.protocol is not null
+- [x] **4.8 Timeline View: "como" indicator** — badge on tasks with steps
 
 ---
 
