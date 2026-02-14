@@ -427,41 +427,33 @@ _Final polish, data integrity, performance, and quality-of-life improvements._
 
 ## Phase 8 -- Notifications & Reminders
 
+> **Status: COMPLETED** — Push subscription management with VAPID keys, notification preferences with per-type toggles (period start, period end, daily summary), settings view accessible from UserMenu. Cron-triggered sender at 7 schedule points (BRT) using web-push library. Service Worker already handles push events and notification clicks from Phase 7. Two new DB tables: push_subscriptions and notification_preferences. Vercel cron config runs every 30 minutes.
+
 _Ensure users don't forget to check tasks. Critical for a family with small children. See `specs/09-notifications-reminders.md`._
 
-- [ ] **8.1 Service Worker registration + PWA manifest**
-  - Register Service Worker (`public/sw.js`) for push notification support
-  - Handle `push` event to display notifications
-  - Handle `notificationclick` to open/focus the app on the correct view
-  - Add `manifest.json` for PWA installability (move from Phase 7.7)
-  - Files: `public/sw.js`, `public/manifest.json`, `app/layout.tsx`
-  - Ref: Spec 09
+- [x] **8.1 Service Worker registration + PWA manifest**
+  - Already completed in Phase 7.7 — SW handles push events and notificationclick
+  - Files: `public/sw.js`, `public/manifest.json`, `components/providers.tsx`
 
-- [ ] **8.2 Push subscription management**
-  - New DB tables: `push_subscriptions` (endpoint, keys, user_email), `notification_preferences` (toggles per type per user)
-  - Add to Drizzle schema and run migration
-  - API: `POST /api/notifications/subscribe`, `DELETE /api/notifications/subscribe`
-  - On client: `PushManager.subscribe()` when user enables notifications
+- [x] **8.2 Push subscription management**
+  - New DB tables: `push_subscriptions` (endpoint, p256dh, auth, user_email), `notification_preferences` (enabled, period_start, period_end, daily_summary)
+  - API: POST/DELETE `/api/notifications/subscribe` with upsert by endpoint
+  - Client subscribes via `PushManager.subscribe()` when user enables notifications in settings
   - Files: `lib/db/schema.ts`, `app/api/notifications/subscribe/route.ts`
-  - Ref: Spec 09
 
-- [ ] **8.3 Notification preferences UI**
-  - Settings screen accessible from user menu
-  - Toggles: general enable, period start, period end, daily summary
-  - Permission status indicator (green/gray/red)
-  - If browser blocks, show instructions
-  - API: `GET/PUT /api/notifications/preferences`
-  - Files: `components/settings-view.tsx`, `app/api/notifications/preferences/route.ts`
-  - Ref: Spec 09
+- [x] **8.3 Notification preferences UI**
+  - Settings drawer accessible from UserMenu > Configuracoes
+  - Main toggle "Ativar notificacoes" with browser permission request
+  - Sub-toggles: period start (06h/12h/18h), period end (11:30h/17:30h/21h), daily summary (21:30h)
+  - Permission status badge: green (granted), red (denied with instructions), gray (default)
+  - Files: `components/settings-view.tsx`, `components/user-menu.tsx`, `app/home/page.tsx`
 
-- [ ] **8.4 Scheduled notification sender (Cron)**
-  - Vercel Cron Job (or equivalent) running every 30 minutes
-  - Checks notification schedule: 06h, 11:30h, 12h, 17:30h, 18h, 21h, 21:30h
-  - Builds payload with pending task counts per user
-  - Sends web-push to each active subscription
-  - API: `POST /api/notifications/send` (protected by cron secret)
-  - Files: `app/api/notifications/send/route.ts`, `vercel.json` (cron config)
-  - Ref: Spec 09
+- [x] **8.4 Scheduled notification sender (Cron)**
+  - Vercel Cron every 30 minutes, 15-minute match window for 7 schedule points (BRT)
+  - Builds per-user payload: period tasks pending count, or daily completion percentage
+  - Sends web-push via `web-push` library with VAPID keys
+  - Auto-cleans expired subscriptions on 410/404 errors
+  - Files: `app/api/notifications/send/route.ts`, `vercel.json`
 
 ---
 
