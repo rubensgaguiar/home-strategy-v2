@@ -5,7 +5,6 @@ import { TaskComplete, RecurrenceType, CategoryDb, Person } from '@/lib/types';
 import { categoryDisplayName } from '@/lib/types';
 import { categoryDbIcon, getPersonStyle } from '@/lib/helpers';
 import { describeRecurrence } from '@/lib/recurrence';
-import { useLongPress } from '@/lib/hooks/use-long-press';
 
 interface Props {
   tasks: TaskComplete[];
@@ -36,18 +35,12 @@ const freqBadgeStyle: Record<RecurrenceType, string> = {
   none: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
 };
 
-function BacklogTaskRow({ task, children, onEdit }: { task: TaskComplete; children: React.ReactNode; onEdit?: (task: TaskComplete) => void }) {
-  const handlers = useLongPress(() => onEdit?.(task));
-  return <div {...handlers}>{children}</div>;
-}
-
 export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
   // Default: exclude daily tasks from backlog
   const [freqFilters, setFreqFilters] = useState<Set<FreqFilter>>(
     new Set(['weekly', 'monthly', 'yearly', 'none'])
   );
   const [catFilters, setCatFilters] = useState<Set<CategoryDb>>(new Set(CATEGORY_OPTIONS));
-  const [expandedTask, setExpandedTask] = useState<number | null>(null);
 
   const toggleFreq = useCallback((f: FreqFilter) => {
     setFreqFilters((prev) => {
@@ -99,67 +92,36 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
   function renderTask(task: TaskComplete) {
     const ps = getPersonStyle(task.primaryPerson);
     const recDesc = describeRecurrence(task.recurrence);
-    const isExpanded = expandedTask === task.id;
     const hasSteps = task.steps && task.steps.length > 0;
     const hasProtocol = task.protocol !== null;
 
     return (
-      <BacklogTaskRow key={task.id} task={task} onEdit={onEditTask}>
-        <div
-          className="px-4 py-2.5 cursor-pointer"
-          onClick={() => setExpandedTask(isExpanded ? null : task.id)}
-        >
-          <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-border shrink-0" />
-            <span className="text-[13px] text-foreground/80 flex-1 min-w-0 truncate">
-              {task.name}
+      <div
+        key={task.id}
+        className="px-4 py-2.5 cursor-pointer active:bg-surface-hover transition-colors"
+        onClick={() => onEditTask?.(task)}
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="w-2 h-2 rounded-full bg-border shrink-0" />
+          <span className="text-[13px] text-foreground/80 flex-1 min-w-0 truncate">
+            {task.name}
+          </span>
+          {hasSteps && (
+            <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-accent/10 text-accent">
+              como
             </span>
-            {hasSteps && (
-              <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-accent/10 text-accent">
-                como
-              </span>
-            )}
-            {hasProtocol && (
-              <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                SOS
-              </span>
-            )}
-            <span className={`shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-md ${freqBadgeStyle[task.recurrence.type]}`}>
-              {recDesc}
-            </span>
-            <span className={`shrink-0 w-2 h-2 rounded-full ${ps.dot}`} />
-          </div>
-
-          {/* Expanded details */}
-          {isExpanded && (
-            <div className="mt-2 ml-4 space-y-2 animate-slide-down">
-              {hasSteps && (
-                <div className="space-y-1">
-                  <span className="text-[10px] font-semibold text-muted uppercase tracking-wider">Passos</span>
-                  {task.steps.map((step, i) => (
-                    <div key={step.id} className="flex items-start gap-2">
-                      <span className="text-[10px] text-muted font-bold tabular-nums">{i + 1}.</span>
-                      <span className="text-[12px] text-foreground/70">{step.description}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {task.planB && (
-                <div>
-                  <span className="text-[10px] font-semibold text-muted uppercase tracking-wider">Plano B</span>
-                  <p className="text-[12px] text-amber-600 dark:text-amber-400 mt-0.5">{task.planB}</p>
-                </div>
-              )}
-              {hasProtocol && (
-                <div>
-                  <span className="text-[10px] font-semibold text-muted uppercase tracking-wider">Protocolo</span>
-                  <p className="text-[12px] text-emerald-600 dark:text-emerald-400 mt-0.5">{task.protocol!.name}</p>
-                </div>
-              )}
-            </div>
           )}
+          {hasProtocol && (
+            <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+              SOS
+            </span>
+          )}
+          <span className={`shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-md ${freqBadgeStyle[task.recurrence.type]}`}>
+            {recDesc}
+          </span>
+          <span className={`shrink-0 w-2 h-2 rounded-full ${ps.dot}`} />
         </div>
-      </BacklogTaskRow>
+      </div>
     );
   }
 
@@ -294,7 +256,7 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
       {/* Footer note */}
       <div className="bg-surface-hover rounded-xl px-4 py-3">
         <p className="text-[11px] text-muted leading-relaxed text-center">
-          Toque longo para editar. Toque para expandir detalhes.
+          Toque para editar.
         </p>
       </div>
     </div>
