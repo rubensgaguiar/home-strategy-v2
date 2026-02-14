@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { TaskForm, TaskFormData } from './task-form';
+import { useToast } from './toast';
 
 interface Props {
   open: boolean;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function TaskCreateModal({ open, onClose, onCreated }: Props) {
+  const { showToast } = useToast();
   useEffect(() => {
     if (!open) return;
     const handleEscape = (e: KeyboardEvent) => {
@@ -63,6 +65,7 @@ export function TaskCreateModal({ open, onClose, onCreated }: Props) {
       throw new Error(err.error || 'Falha ao criar tarefa');
     }
 
+    showToast('Tarefa criada');
     onCreated();
     onClose();
   };

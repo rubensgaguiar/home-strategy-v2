@@ -5,6 +5,7 @@ import { TaskComplete } from '@/lib/types';
 import { TaskForm, TaskFormData } from './task-form';
 import { ConfirmDialog } from './confirm-dialog';
 import { RecurrenceFormData } from './recurrence-config';
+import { useToast } from './toast';
 
 interface Props {
   open: boolean;
@@ -41,6 +42,7 @@ function taskToFormData(task: TaskComplete): Partial<TaskFormData> {
 }
 
 export function TaskEditModal({ open, task, onClose, onUpdated, onDeleted }: Props) {
+  const { showToast } = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -103,6 +105,7 @@ export function TaskEditModal({ open, task, onClose, onUpdated, onDeleted }: Pro
       throw new Error(err.error || 'Falha ao atualizar tarefa');
     }
 
+    showToast('Tarefa atualizada');
     onUpdated();
     onClose();
   };
@@ -112,6 +115,7 @@ export function TaskEditModal({ open, task, onClose, onUpdated, onDeleted }: Pro
     try {
       const res = await fetch(`/api/tasks/${task.id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Falha ao excluir tarefa');
+      showToast('Tarefa excluida');
       onDeleted();
       onClose();
     } catch (err) {
