@@ -90,6 +90,7 @@ export const taskCompletions = pgTable('task_completions', {
   date: date('date').notNull(),
   status: completionStatusEnum('status').notNull(),
   userEmail: text('user_email').notNull(),
+  notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
   unique('task_completions_task_date_unique').on(table.taskId, table.date),

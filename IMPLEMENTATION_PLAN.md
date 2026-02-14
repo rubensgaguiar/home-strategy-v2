@@ -487,24 +487,27 @@ _Visibility into historical performance helps optimize routines over time. See `
 
 ## Phase 10 -- Future Enhancements (Stretch Goals)
 
+> **Status: PARTIAL** — 10.1 (notes on completions) and 10.2 (real-time polling sync) implemented. 10.3 (templates) and 10.4 (calendar integration) deferred for future consideration.
+
 _Additional features to consider after core and analytics phases are complete._
 
-- [ ] **10.1 Notes on completions**
-  - Optional text note when marking a task done/not_done ("O que aconteceu?", "O que ajudou?")
-  - Add `notes` field to task_completions table
-  - Visible in completion history
+- [x] **10.1 Notes on completions**
+  - Added `notes` text column to task_completions schema
+  - Completions API (POST) accepts and persists optional `notes` field
+  - `useCompletions` hook: `markDone`/`markNotDone` accept optional notes string, `getNotes(taskId)` returns saved notes
+  - Files: `lib/db/schema.ts`, `app/api/completions/route.ts`, `lib/hooks/use-completions.ts`
 
-- [ ] **10.2 Real-time sync between users**
-  - When one user marks a task done, the other sees it update without refreshing
-  - Options: polling (simple, every 30s), Server-Sent Events, or WebSocket
-  - Start with simple polling, upgrade if needed
+- [x] **10.2 Real-time sync between users**
+  - Simple polling: `useCompletions` refetches every 30 seconds
+  - Skips update if pending writes exist (avoids clobbering optimistic state)
+  - Files: `lib/hooks/use-completions.ts`
 
-- [ ] **10.3 Task templates / presets**
+- [ ] **10.3 Task templates / presets** _(deferred)_
   - Pre-built task templates for common household operations
   - "Import template" to quickly add a set of related tasks
   - Export current tasks as template for backup/sharing
 
-- [ ] **10.4 Calendar integration**
+- [ ] **10.4 Calendar integration** _(deferred)_
   - Export recurring tasks as iCal feed
   - Sync with Google Calendar for visibility in external tools
 

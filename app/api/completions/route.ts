@@ -41,10 +41,11 @@ export async function POST(request: NextRequest) {
     return jsonError('Invalid JSON body', 400);
   }
 
-  const { task_id, date, status } = body as {
+  const { task_id, date, status, notes } = body as {
     task_id?: number;
     date?: string;
     status?: string;
+    notes?: string;
   };
 
   if (!task_id) return jsonError('task_id is required', 400);
@@ -61,12 +62,14 @@ export async function POST(request: NextRequest) {
       date,
       status: status as 'done' | 'not_done',
       userEmail: email,
+      notes: notes || null,
     })
     .onConflictDoUpdate({
       target: [taskCompletions.taskId, taskCompletions.date],
       set: {
         status: status as 'done' | 'not_done',
         userEmail: email,
+        notes: notes || null,
         createdAt: new Date(),
       },
     })
