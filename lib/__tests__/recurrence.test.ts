@@ -13,14 +13,18 @@ function d(year: number, month: number, day: number): Date {
   return new Date(year, month - 1, day); // month is 1-based for readability
 }
 
+type RecurrenceOverrides = Partial<Pick<TaskWithRecurrence['recurrence'],
+  'type' | 'interval' | 'daysOfWeek' | 'dayOfMonth' | 'monthOfYear' | 'weekOfMonth' | 'periods'
+>>;
+
 function makeTask(
-  overrides: Partial<TaskWithRecurrence> & { recurrence: Partial<TaskWithRecurrence['recurrence']> }
+  overrides: Partial<Omit<TaskWithRecurrence, 'recurrence'>> & { recurrence: RecurrenceOverrides }
 ): TaskWithRecurrence {
-  return {
+  const base = {
     id: 1,
     name: 'Test Task',
-    category: 'casa',
-    primaryPerson: 'rubens',
+    category: 'casa' as const,
+    primaryPerson: 'rubens' as const,
     secondaryPerson: null,
     planB: null,
     optional: false,
@@ -29,18 +33,23 @@ function makeTask(
     createdAt: d(2025, 1, 6), // Mon Jan 6 2025
     updatedAt: d(2025, 1, 6),
     ...overrides,
-    recurrence: {
-      id: 1,
-      taskId: overrides.id ?? 1,
-      type: 'daily',
-      interval: 1,
-      daysOfWeek: null,
-      dayOfMonth: null,
-      monthOfYear: null,
-      weekOfMonth: null,
-      periods: ['MA'],
-      ...overrides.recurrence,
-    },
+  };
+
+  const recurrenceDefaults: TaskWithRecurrence['recurrence'] = {
+    id: 1,
+    taskId: base.id,
+    type: 'daily',
+    interval: 1,
+    daysOfWeek: null,
+    dayOfMonth: null,
+    monthOfYear: null,
+    weekOfMonth: null,
+    periods: ['MA'],
+  };
+
+  return {
+    ...base,
+    recurrence: { ...recurrenceDefaults, ...overrides.recurrence },
   };
 }
 

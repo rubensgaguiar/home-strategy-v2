@@ -104,9 +104,11 @@ _These items unblock all other work. Nothing can proceed without a working datab
 
 ## Phase 1 -- Data Layer (API Routes)
 
+> **Status: COMPLETED** — All 9 API routes implemented. Key learning: DB connection must be lazy-initialized (via Proxy) to avoid throwing during Next.js static build when POSTGRES_URL is not set.
+
 _Expose the database through API routes. This phase replaces hardcoded data imports with server-fetched data._
 
-- [ ] **1.1 Tasks API -- GET /api/tasks**
+- [x] **1.1 Tasks API -- GET /api/tasks**
   - List all tasks with joined recurrences and steps
   - Query params: `category`, `person`, `frequency_type` (all optional, combinable)
   - Joins: task_recurrences (1:1), task_steps (1:many), protocols (optional FK)
@@ -114,7 +116,7 @@ _Expose the database through API routes. This phase replaces hardcoded data impo
   - Files: `app/api/tasks/route.ts`
   - Ref: Spec 02
 
-- [ ] **1.2 Tasks API -- POST /api/tasks**
+- [x] **1.2 Tasks API -- POST /api/tasks**
   - Create task + recurrence + steps in a single transaction
   - Body: task fields + recurrence fields + optional steps array
   - Validation: name required (min 2 chars), category required, primary_person required, recurrence type required
@@ -123,20 +125,20 @@ _Expose the database through API routes. This phase replaces hardcoded data impo
   - Files: `app/api/tasks/route.ts`
   - Ref: Spec 02
 
-- [ ] **1.3 Tasks API -- GET/PUT/DELETE /api/tasks/[id]**
+- [x] **1.3 Tasks API -- GET/PUT/DELETE /api/tasks/[id]**
   - GET: return task with recurrence, steps, linked protocol
   - PUT: update task + recurrence + steps (replace steps array entirely in transaction)
   - DELETE: cascade delete recurrence and steps; keep completions (they reference task_id for historical records)
   - Files: `app/api/tasks/[id]/route.ts`
   - Ref: Spec 02
 
-- [ ] **1.4 Tasks API -- PATCH /api/tasks/reorder**
+- [x] **1.4 Tasks API -- PATCH /api/tasks/reorder**
   - Body: array of `{ task_id: number, sort_order: number }`
   - Batch update sort_order in transaction
   - Files: `app/api/tasks/reorder/route.ts`
   - Ref: Spec 02
 
-- [ ] **1.5 Completions API -- POST /api/completions**
+- [x] **1.5 Completions API -- POST /api/completions**
   - UPSERT: create or update completion by (task_id, date)
   - Body: `{ task_id, date, status }` -- user_email extracted from NextAuth session
   - Validate: status must be 'done' or 'not_done'
@@ -144,20 +146,20 @@ _Expose the database through API routes. This phase replaces hardcoded data impo
   - Files: `app/api/completions/route.ts`
   - Ref: Spec 06, Spec 08
 
-- [ ] **1.6 Completions API -- GET /api/completions**
+- [x] **1.6 Completions API -- GET /api/completions**
   - Query params: `date` (required, YYYY-MM-DD), `user_email` (optional)
   - Return: all completions for that date
   - Used to load state when app opens
   - Files: `app/api/completions/route.ts`
   - Ref: Spec 08
 
-- [ ] **1.7 Completions API -- DELETE /api/completions/[id]**
+- [x] **1.7 Completions API -- DELETE /api/completions/[id]**
   - Delete specific completion (undo action)
   - Return task back to "pending" state
   - Files: `app/api/completions/[id]/route.ts`
   - Ref: Spec 06, Spec 08
 
-- [ ] **1.8 Protocols API -- full CRUD**
+- [x] **1.8 Protocols API -- full CRUD**
   - GET /api/protocols: list all protocols
   - POST /api/protocols: create protocol (validate: name, trigger, actions min 1, color required)
   - PUT /api/protocols/[id]: update protocol
@@ -165,7 +167,7 @@ _Expose the database through API routes. This phase replaces hardcoded data impo
   - Files: `app/api/protocols/route.ts`, `app/api/protocols/[id]/route.ts`
   - Ref: Spec 07
 
-- [ ] **1.9 Completions History API -- GET /api/completions/history**
+- [x] **1.9 Completions History API -- GET /api/completions/history**
   - Query params: `start_date`, `end_date`, `task_id` (optional)
   - Return: completions within date range, optionally filtered by task
   - For future analytics/reports
