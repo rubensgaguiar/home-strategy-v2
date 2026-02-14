@@ -152,7 +152,7 @@ export function RecurrenceConfig({ value, onChange }: Props) {
               max={365}
               value={value.interval}
               onChange={(e) => update({ interval: Math.max(1, parseInt(e.target.value) || 1) })}
-              className="w-16 px-2 py-1.5 rounded-lg border border-border bg-surface text-[13px] text-foreground text-center"
+              className="w-16 px-2 py-1.5 rounded-lg border border-border bg-input text-[13px] text-foreground text-center"
             />
             <span className="text-[12px] text-muted">dia(s)</span>
           </div>
@@ -195,7 +195,7 @@ export function RecurrenceConfig({ value, onChange }: Props) {
                 max={52}
                 value={value.interval}
                 onChange={(e) => update({ interval: Math.max(1, parseInt(e.target.value) || 1) })}
-                className="w-16 px-2 py-1.5 rounded-lg border border-border bg-surface text-[13px] text-foreground text-center"
+                className="w-16 px-2 py-1.5 rounded-lg border border-border bg-input text-[13px] text-foreground text-center"
               />
               <span className="text-[12px] text-muted">semana(s)</span>
             </div>
@@ -247,7 +247,7 @@ export function RecurrenceConfig({ value, onChange }: Props) {
                 max={31}
                 value={value.dayOfMonth ?? 1}
                 onChange={(e) => update({ dayOfMonth: Math.max(1, Math.min(31, parseInt(e.target.value) || 1)) })}
-                className="w-20 px-2 py-1.5 rounded-lg border border-border bg-surface text-[13px] text-foreground text-center"
+                className="w-20 px-2 py-1.5 rounded-lg border border-border bg-input text-[13px] text-foreground text-center"
               />
             </div>
           )}
@@ -261,7 +261,7 @@ export function RecurrenceConfig({ value, onChange }: Props) {
                 <select
                   value={value.weekOfMonth ?? 1}
                   onChange={(e) => update({ weekOfMonth: parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-[13px] text-foreground"
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-input text-[13px] text-foreground styled-select"
                 >
                   <option value={1}>1o</option>
                   <option value={2}>2o</option>
@@ -307,7 +307,7 @@ export function RecurrenceConfig({ value, onChange }: Props) {
                 max={12}
                 value={value.interval}
                 onChange={(e) => update({ interval: Math.max(1, parseInt(e.target.value) || 1) })}
-                className="w-16 px-2 py-1.5 rounded-lg border border-border bg-surface text-[13px] text-foreground text-center"
+                className="w-16 px-2 py-1.5 rounded-lg border border-border bg-input text-[13px] text-foreground text-center"
               />
               <span className="text-[12px] text-muted">mes(es)</span>
             </div>
@@ -325,7 +325,7 @@ export function RecurrenceConfig({ value, onChange }: Props) {
             <select
               value={value.monthOfYear ?? 1}
               onChange={(e) => update({ monthOfYear: parseInt(e.target.value) })}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-surface text-[13px] text-foreground"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-input text-[13px] text-foreground styled-select"
             >
               {MONTH_NAMES.map((name, i) => (
                 <option key={i} value={i + 1}>{name}</option>
@@ -342,7 +342,7 @@ export function RecurrenceConfig({ value, onChange }: Props) {
               max={31}
               value={value.dayOfMonth ?? 1}
               onChange={(e) => update({ dayOfMonth: Math.max(1, Math.min(31, parseInt(e.target.value) || 1)) })}
-              className="w-full px-2 py-1.5 rounded-lg border border-border bg-surface text-[13px] text-foreground text-center"
+              className="w-full px-2 py-1.5 rounded-lg border border-border bg-input text-[13px] text-foreground text-center"
             />
           </div>
         </div>

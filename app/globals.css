@@ -9,6 +9,7 @@
   --border-subtle: #f5f5f4;
   --muted: #a8a29e;
   --accent: #10b981;
+  --input: #f5f5f4;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,6 +22,7 @@
     --border-subtle: #1c1917;
     --muted: #78716c;
     --accent: #34d399;
+    --input: #292524;
   }
 }
 
@@ -33,6 +35,7 @@
   --color-border-subtle: var(--border-subtle);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
+  --color-input: var(--input);
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
@@ -141,4 +144,26 @@ body {
 .tap-highlight:active {
   transform: scale(0.98);
   transition: transform 50ms ease;
+}
+
+/* Skeleton loading shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-hover) 25%, var(--border) 50%, var(--surface-hover) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 1rem;
+}
+
+/* Styled select with custom chevron */
+.styled-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
 }

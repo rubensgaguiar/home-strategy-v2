@@ -112,7 +112,7 @@ export function EmergencyView() {
                       <h3 className="text-[14px] font-bold text-foreground tracking-tight">
                         {protocol.name}
                       </h3>
-                      <p className="text-[11px] text-muted mt-0.5">
+                      <p className="text-[12px] text-muted/80 italic mt-0.5">
                         {protocol.trigger}
                       </p>
                     </div>

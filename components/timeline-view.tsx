@@ -71,9 +71,9 @@ function SortableTaskItem({ task, children }: { task: TaskComplete; children: Re
         {/* Drag handle */}
         <button
           {...listeners}
-          className="shrink-0 w-5 h-full flex items-center justify-center text-muted/40 hover:text-muted cursor-grab active:cursor-grabbing touch-none pt-2.5"
+          className="shrink-0 w-5 h-full flex items-center justify-center text-muted/60 hover:text-muted cursor-grab active:cursor-grabbing touch-none pt-2.5"
         >
-          <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor">
+          <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
             <circle cx="5" cy="3" r="1.5" />
             <circle cx="11" cy="3" r="1.5" />
             <circle cx="5" cy="8" r="1.5" />
@@ -209,7 +209,7 @@ export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onM
                 <span className="text-[11px] font-semibold text-muted tabular-nums">
                   {doneCount}/{totalCount}
                 </span>
-                <div className="w-8 h-1 bg-border-subtle rounded-full overflow-hidden">
+                <div className="w-10 h-1.5 bg-border-subtle rounded-full overflow-hidden">
                   <div
                     className="h-full bg-accent rounded-full transition-all duration-500"
                     style={{ width: totalCount > 0 ? `${(doneCount / totalCount) * 100}%` : '0%' }}
@@ -229,6 +229,7 @@ export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onM
               <div className="animate-slide-down">
                 {periodTasks.length === 0 && (
                   <div className="px-4 py-4 text-center">
+                    <p className="text-base mb-1">{period.id === 'MA' ? '🌅' : period.id === 'TA' ? '☀️' : '🌙'}</p>
                     <p className="text-[12px] text-muted">Sem tarefas neste periodo</p>
                   </div>
                 )}
@@ -299,7 +300,7 @@ export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onM
                                       <span className="text-[10px] text-muted ml-1">{task.repetitions}</span>
                                     )}
                                     {task.optional && (
-                                      <span className="text-[9px] text-muted ml-1 not-italic uppercase font-medium">
+                                      <span className="text-[10px] text-muted ml-1 not-italic uppercase font-medium">
                                         opc
                                       </span>
                                     )}
@@ -315,14 +316,14 @@ export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onM
                                     </span>
                                   )}
 
-                                  <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${ps.dot}`} />
+                                  <span className={`shrink-0 w-2 h-2 rounded-full ${ps.dot}`} />
 
                                   <button
                                     onClick={() => setExpandedPlanB(planBExpanded ? null : task.id)}
                                     className={`shrink-0 w-5 h-5 flex items-center justify-center rounded-md transition-all duration-150 ${
                                       planBExpanded
                                         ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400'
-                                        : 'text-muted/0 group-hover:text-muted hover:text-amber-500 dark:hover:text-amber-400'
+                                        : 'text-muted/30 hover:text-amber-500 dark:hover:text-amber-400'
                                     }`}
                                   >
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
@@ -335,14 +336,14 @@ export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onM
                                   <div className="mt-1 ml-7 flex gap-1.5">
                                     <button
                                       onClick={() => onMarkDone(task.id)}
-                                      className="text-[10px] font-medium text-accent hover:underline"
+                                      className="text-[11px] py-0.5 font-medium text-accent hover:underline"
                                     >
                                       Feito
                                     </button>
                                     <span className="text-border">&middot;</span>
                                     <button
                                       onClick={() => onMarkNotDone(task.id)}
-                                      className="text-[10px] font-medium text-red-500 dark:text-red-400 hover:underline"
+                                      className="text-[11px] py-0.5 font-medium text-red-500 dark:text-red-400 hover:underline"
                                     >
                                       Nao feito
                                     </button>

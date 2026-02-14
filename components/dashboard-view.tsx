@@ -140,7 +140,21 @@ export function DashboardView() {
       )}
 
       {!loading && viewPeriod === 'week' && weekData && <WeekDashboard data={weekData} />}
+      {!loading && viewPeriod === 'week' && !weekData && (
+        <div className="text-center py-12">
+          <p className="text-xl mb-2">📊</p>
+          <p className="text-[13px] text-muted">Ainda sem dados para esta semana</p>
+          <p className="text-[11px] text-muted/70 mt-1">Complete tarefas para ver suas estatisticas</p>
+        </div>
+      )}
       {!loading && viewPeriod === 'month' && monthData && <MonthDashboard data={monthData} />}
+      {!loading && viewPeriod === 'month' && !monthData && (
+        <div className="text-center py-12">
+          <p className="text-xl mb-2">📈</p>
+          <p className="text-[13px] text-muted">Ainda sem dados para este mes</p>
+          <p className="text-[11px] text-muted/70 mt-1">Complete tarefas para ver suas estatisticas</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -193,28 +207,30 @@ function WeekDashboard({ data }: { data: WeekSummary }) {
       {/* Bar chart — last 7 days */}
       <div className="bg-surface rounded-2xl border border-border p-4">
         <p className="text-[11px] font-semibold text-muted mb-3">Ultimos 7 dias</p>
-        <div className="flex items-end gap-1.5 h-24">
-          {data.days.map((day, i) => {
-            const height = day.total > 0 ? Math.max(4, (day.rate / 100) * 96) : 4;
-            const dayName = DAY_NAMES[getDayOfWeek(day.date)];
+        <div className="relative">
+          <div className="flex items-end gap-1.5 h-24">
+            {data.days.map((day, i) => {
+              const height = day.total > 0 ? Math.max(4, (day.rate / 100) * 96) : 4;
+              const dayName = DAY_NAMES[getDayOfWeek(day.date)];
 
-            return (
-              <div key={day.date} className="flex-1 flex flex-col items-center gap-1">
-                <span className="text-[9px] font-semibold text-muted tabular-nums">{day.rate}%</span>
-                <div className="w-full flex items-end" style={{ height: 96 }}>
-                  <div
-                    className={`w-full rounded-t-md transition-all duration-500 ${rateColor(day.rate)}`}
-                    style={{ height }}
-                  />
+              return (
+                <div key={day.date} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-[9px] font-semibold text-muted tabular-nums">{day.rate}%</span>
+                  <div className="w-full flex items-end" style={{ height: 96 }}>
+                    <div
+                      className={`w-full rounded-t-md transition-all duration-500 ${rateColor(day.rate)}`}
+                      style={{ height }}
+                    />
+                  </div>
+                  <span className="text-[9px] text-muted">{dayName}</span>
                 </div>
-                <span className="text-[9px] text-muted">{dayName}</span>
-              </div>
-            );
-          })}
-        </div>
-        {/* 80% threshold line */}
-        <div className="relative -mt-[24px] mb-[24px] pointer-events-none">
-          <div className="absolute left-0 right-0 border-t border-dashed border-accent/40" style={{ bottom: `${80 * 0.96}px` }} />
+              );
+            })}
+          </div>
+          {/* 80% threshold line */}
+          <div className="absolute left-0 right-0 pointer-events-none" style={{ bottom: `calc(${80 * 0.96}px + 1rem)` }}>
+            <div className="border-t border-dashed border-accent/40" />
+          </div>
         </div>
       </div>
 
@@ -321,7 +337,7 @@ function MonthDashboard({ data }: { data: MonthSummary }) {
             return (
               <div
                 key={day}
-                className={`aspect-square rounded-md flex items-center justify-center text-[10px] font-medium ${
+                className={`aspect-square min-h-[28px] rounded-md flex items-center justify-center text-[11px] font-medium ${
                   hasData ? `${heatMapColor(rate!)} text-white` : 'bg-border-subtle/50 text-muted'
                 }`}
               >
@@ -371,7 +387,9 @@ function MonthDashboard({ data }: { data: MonthSummary }) {
           <div className="space-y-2">
             {data.mostSkipped.map((task) => (
               <div key={task.taskId} className="flex items-center gap-2">
-                <span className="text-[12px] flex-1 min-w-0 truncate text-foreground">{task.name}</span>
+                <span className="text-[12px] flex-1 min-w-0 truncate text-foreground">
+                  {task.name} <span className="text-[10px] text-muted">{task.done}/{task.total}</span>
+                </span>
                 <div className="w-12 h-1.5 bg-border-subtle rounded-full overflow-hidden shrink-0">
                   <div
                     className={`h-full rounded-full ${rateColor(task.rate)}`}

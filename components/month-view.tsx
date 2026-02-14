@@ -44,6 +44,7 @@ export function MonthView({ tasks, year, month, person, onEditTask }: Props) {
     <div className="space-y-2 stagger-children">
       {sortedDays.length === 0 && (
         <div className="text-center py-8">
+          <p className="text-xl mb-2">📅</p>
           <p className="text-[13px] text-muted">Sem tarefas mensais/anuais em {MONTH_NAMES[month]}</p>
         </div>
       )}
@@ -53,7 +54,7 @@ export function MonthView({ tasks, year, month, person, onEditTask }: Props) {
         const isToday = day === todayDay;
 
         return (
-          <div key={day} className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div key={day} className={`bg-surface rounded-2xl border border-border overflow-hidden ${isToday ? 'border-l-[3px] border-l-accent' : ''}`}>
             <div className="px-4 py-2.5 flex items-center gap-2 border-b border-border-subtle">
               <span className={`text-[14px] font-bold tabular-nums ${isToday ? 'text-accent' : 'text-foreground'}`}>
                 {day}
@@ -74,14 +75,14 @@ export function MonthView({ tasks, year, month, person, onEditTask }: Props) {
                 return (
                   <div
                     key={task.id}
-                    className="py-1.5 flex items-center gap-2.5"
+                    className="py-2 flex items-center gap-2.5 cursor-pointer hover:bg-surface-hover rounded-lg -mx-1 px-1 transition-colors"
                     onClick={() => onEditTask?.(task)}
                   >
-                    <span className="text-[10px]">{categoryDbIcon[task.category]}</span>
+                    <span className="text-[12px]">{categoryDbIcon[task.category]}</span>
                     <span className="text-[13px] text-foreground flex-1 min-w-0 truncate">
                       {task.name}
                     </span>
-                    <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${ps.dot}`} />
+                    <span className={`shrink-0 w-2 h-2 rounded-full ${ps.dot}`} />
                   </div>
                 );
               })}

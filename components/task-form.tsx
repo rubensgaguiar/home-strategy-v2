@@ -120,7 +120,7 @@ export function TaskForm({ initial, onSubmit, submitLabel, isLoading }: Props) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nome da tarefa"
-          className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface text-[14px] text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
+          className="w-full px-3 py-2.5 rounded-xl border border-border bg-input text-[14px] text-foreground placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"
           autoFocus
         />
       </div>
@@ -134,7 +134,7 @@ export function TaskForm({ initial, onSubmit, submitLabel, isLoading }: Props) {
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as CategoryDb)}
-            className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface text-[13px] text-foreground"
+            className="w-full px-3 py-2.5 rounded-xl border border-border bg-input text-[13px] text-foreground styled-select"
           >
             {CATEGORY_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -148,7 +148,7 @@ export function TaskForm({ initial, onSubmit, submitLabel, isLoading }: Props) {
           <select
             value={primaryPerson}
             onChange={(e) => setPrimaryPerson(e.target.value as Person)}
-            className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface text-[13px] text-foreground"
+            className="w-full px-3 py-2.5 rounded-xl border border-border bg-input text-[13px] text-foreground styled-select"
           >
             {PERSON_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -186,7 +186,7 @@ export function TaskForm({ initial, onSubmit, submitLabel, isLoading }: Props) {
             <select
               value={secondaryPerson ?? ''}
               onChange={(e) => setSecondaryPerson(e.target.value ? e.target.value as Person : null)}
-              className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface text-[13px] text-foreground"
+              className="w-full px-3 py-2.5 rounded-xl border border-border bg-input text-[13px] text-foreground styled-select"
             >
               <option value="">Nenhum</option>
               {PERSON_OPTIONS.map((opt) => (
@@ -205,7 +205,7 @@ export function TaskForm({ initial, onSubmit, submitLabel, isLoading }: Props) {
               value={repetitions}
               onChange={(e) => setRepetitions(e.target.value)}
               placeholder="Ex: N vezes, 3x ao dia"
-              className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface text-[13px] text-foreground placeholder:text-muted/50"
+              className="w-full px-3 py-2.5 rounded-xl border border-border bg-input text-[13px] text-foreground placeholder:text-muted/50"
             />
           </div>
 
@@ -253,7 +253,7 @@ export function TaskForm({ initial, onSubmit, submitLabel, isLoading }: Props) {
                   value={step}
                   onChange={(e) => updateStep(i, e.target.value)}
                   placeholder="Passo..."
-                  className="flex-1 px-2.5 py-1.5 rounded-lg border border-border bg-surface text-[12px] text-foreground placeholder:text-muted/50"
+                  className="flex-1 px-2.5 py-1.5 rounded-lg border border-border bg-input text-[12px] text-foreground placeholder:text-muted/50"
                 />
                 <button
                   type="button"

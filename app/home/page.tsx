@@ -182,7 +182,7 @@ export default function HomePage() {
                     if (scope === 'semana') setWeekOffset(0);
                     if (scope === 'mes') setMonthOffset(0);
                   }}
-                  className={`flex-1 py-1.5 text-[12px] font-semibold rounded-lg transition-all duration-200 tap-highlight ${
+                  className={`flex-1 py-2 text-[13px] font-semibold rounded-lg transition-all duration-200 tap-highlight ${
                     isActive
                       ? 'bg-foreground text-background shadow-sm'
                       : 'text-muted'
@@ -283,14 +283,14 @@ export default function HomePage() {
                 <button
                   key={pf}
                   onClick={() => setPersonFilter(pf)}
-                  className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all duration-200 tap-highlight ${
+                  className={`px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all duration-200 tap-highlight ${
                     isActive
                       ? pf === 'rubens'
                         ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300'
                         : pf === 'diene'
                         ? 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300'
                         : 'bg-surface text-foreground border border-border'
-                      : 'text-muted'
+                      : 'text-muted/80 bg-surface-hover border border-border-subtle'
                   }`}
                 >
                   {label}
@@ -337,8 +337,10 @@ export default function HomePage() {
       {/* ── Content ───────────────────────────────────────────── */}
       <main className="px-5 pt-2 pb-4">
         {activeTab === 'dia' && tasksLoading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          <div className="space-y-3">
+            <div className="skeleton h-24 w-full" />
+            <div className="skeleton h-24 w-full" />
+            <div className="skeleton h-24 w-full" />
           </div>
         )}
 
@@ -451,19 +453,19 @@ export default function HomePage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-0.5 py-2.5 px-4 tap-highlight transition-colors duration-200 ${
+                className={`flex flex-col items-center gap-0.5 py-3 px-5 tap-highlight transition-colors duration-200 ${
                   isActive ? 'text-accent' : 'text-muted'
                 }`}
               >
-                <div className="relative">
+                <div className={`relative ${isActive ? 'p-1 -m-1 rounded-lg bg-accent/10' : ''}`}>
                   {tab.icon(isActive)}
                   {tab.id === 'backlog' && inboxCount > 0 && (
-                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-[14px] rounded-full bg-red-500 text-white text-[8px] font-bold flex items-center justify-center px-0.5">
+                    <span className="absolute -top-1 -right-1.5 min-w-[16px] h-[16px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-0.5">
                       {inboxCount}
                     </span>
                   )}
                 </div>
-                <span className="text-[10px] font-medium">{tab.label}</span>
+                <span className="text-[11px] font-medium">{tab.label}</span>
               </button>
             );
           })}

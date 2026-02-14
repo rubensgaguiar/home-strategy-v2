@@ -77,7 +77,7 @@ export function WeekView({ tasks, weekStart, person, onEditTask }: Props) {
         const monthNum = date.getMonth() + 1;
 
         return (
-          <div key={dayIndex} className="bg-surface rounded-2xl border border-border overflow-hidden">
+          <div key={dayIndex} className={`bg-surface rounded-2xl border border-border overflow-hidden ${isToday ? 'border-l-[3px] border-l-accent' : ''}`}>
             <button
               onClick={() => toggleDay(dayIndex)}
               className="w-full px-4 py-2.5 flex items-center gap-3 tap-highlight"
@@ -116,7 +116,9 @@ export function WeekView({ tasks, weekStart, person, onEditTask }: Props) {
 
             {!isCollapsed && dayTaskList.length === 0 && (
               <div className="px-4 py-3 text-center">
-                <p className="text-[12px] text-muted">Sem tarefas especificas</p>
+                <p className="text-[12px] text-muted">
+                  {isToday ? 'Dia livre! Aproveite.' : 'Sem tarefas especificas para este dia.'}
+                </p>
               </div>
             )}
           </div>
@@ -171,7 +173,7 @@ function DayCompletionSection({ dateStr, tasks, onEditTask }: { dateStr: string;
                 {task.name}
               </span>
               <span className="text-[10px]">{categoryDbIcon[task.category]}</span>
-              <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${ps.dot}`} />
+              <span className={`shrink-0 w-2 h-2 rounded-full ${ps.dot}`} />
             </div>
           </WeekTaskRow>
         );

@@ -110,7 +110,7 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
           onClick={() => setExpandedTask(isExpanded ? null : task.id)}
         >
           <div className="flex items-center gap-2.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-border shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-border shrink-0" />
             <span className="text-[13px] text-foreground/80 flex-1 min-w-0 truncate">
               {task.name}
             </span>
@@ -127,7 +127,7 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
             <span className={`shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-md ${freqBadgeStyle[task.recurrence.type]}`}>
               {recDesc}
             </span>
-            <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${ps.dot}`} />
+            <span className={`shrink-0 w-2 h-2 rounded-full ${ps.dot}`} />
           </div>
 
           {/* Expanded details */}
@@ -184,15 +184,15 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
               <button
                 key={f.id}
                 onClick={() => toggleFreq(f.id)}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all tap-highlight ${
+                className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all tap-highlight ${
                   isActive
                     ? freqBadgeStyle[f.id]
-                    : 'text-muted bg-surface-hover'
+                    : 'text-muted/80 bg-surface-hover border border-border-subtle'
                 }`}
               >
                 {f.label}
                 {f.id === 'none' && inboxCount > 0 && (
-                  <span className="ml-1 px-1 py-0 rounded-full bg-red-500 text-white text-[8px] font-bold">
+                  <span className="ml-1 px-1 py-0 rounded-full bg-red-500 text-white text-[9px] font-bold">
                     {inboxCount}
                   </span>
                 )}
@@ -207,17 +207,29 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
               <button
                 key={c}
                 onClick={() => toggleCat(c)}
-                className={`px-2 py-1 rounded-lg text-[10px] font-semibold transition-all tap-highlight flex items-center gap-1 ${
+                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-all tap-highlight flex items-center gap-1 ${
                   isActive
                     ? 'bg-surface text-foreground border border-border'
-                    : 'text-muted bg-surface-hover'
+                    : 'text-muted/80 bg-surface-hover border border-border-subtle'
                 }`}
               >
-                <span className="text-[10px]">{categoryDbIcon[c]}</span>
+                <span className="text-[12px]">{categoryDbIcon[c]}</span>
                 {categoryDisplayName[c]}
               </button>
             );
           })}
+          <button
+            onClick={() => {
+              if (catFilters.size === CATEGORY_OPTIONS.length) {
+                setCatFilters(new Set());
+              } else {
+                setCatFilters(new Set(CATEGORY_OPTIONS));
+              }
+            }}
+            className="px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-all tap-highlight text-accent border border-accent/30 bg-accent/5"
+          >
+            {catFilters.size === CATEGORY_OPTIONS.length ? 'Limpar' : 'Todas'}
+          </button>
         </div>
       </div>
 
@@ -272,6 +284,7 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
 
           {filtered.length === 0 && (
             <div className="text-center py-8">
+              <p className="text-xl mb-2">🔍</p>
               <p className="text-[13px] text-muted">Nenhuma tarefa encontrada com estes filtros</p>
             </div>
           )}
