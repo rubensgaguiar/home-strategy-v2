@@ -15,6 +15,13 @@
       "when": 1771037220309,
       "tag": "0001_dear_blue_blade",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771100000000,
+      "tag": "0002_create_users_table",
+      "breakpoints": true
     }
   ]
 }

@@ -33,13 +33,9 @@ export function UserMenu() {
         onClick={() => setIsOpen(!isOpen)}
         className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-border hover:ring-muted transition-all tap-highlight"
       >
-        {session.user.image ? (
-          <img src={session.user.image} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-surface flex items-center justify-center text-[11px] font-bold text-muted">
-            {initials}
-          </div>
-        )}
+        <div className="w-full h-full bg-surface flex items-center justify-center text-[11px] font-bold text-muted">
+          {initials}
+        </div>
       </button>
 
       {isOpen && (

@@ -1,27 +1,39 @@
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-
-const ALLOWED_EMAILS = [
-  "rubens.miguek@gmail.com",
-  "diene12374@gmail.com"
-];
+import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    Credentials({
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Senha", type: "password" },
+      },
+      async authorize(credentials) {
+        const email = credentials?.email as string | undefined;
+        const password = credentials?.password as string | undefined;
+
+        if (!email || !password) return null;
+
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, email.toLowerCase()))
+          .limit(1);
+
+        if (!user) return null;
+
+        const valid = await bcrypt.compare(password, user.passwordHash);
+        if (!valid) return null;
+
+        return { id: String(user.id), email: user.email, name: user.name };
+      },
     }),
   ],
   callbacks: {
-    async signIn({ user }) {
-      const email = user.email;
-      if (!email) return false;
-      if (!ALLOWED_EMAILS.includes(email.toLowerCase())) {
-        return `/?error=unauthorized`;
-      }
-      return true;
-    },
     async session({ session }) {
       return session;
     },
