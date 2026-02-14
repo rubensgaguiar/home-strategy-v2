@@ -256,9 +256,11 @@ _Replace hardcoded data and localStorage with API-backed hooks and data fetching
 
 ## Phase 3 -- Task CRUD & Interaction
 
+> **Status: COMPLETED** — All 8 items implemented. FAB visible on all screens, task creation drawer with full recurrence config, task edit modal via long press on any task in FocusView/TimelineView/BacklogView, delete confirmation dialog, task steps management with up/down reorder. API routes updated to handle `repetitions` field. RecurrenceConfig component with conditional fields per type and Portuguese preview text.
+
 _Enable users to create, edit, and delete tasks through the UI. This is the core CRUD experience._
 
-- [ ] **3.1 Floating "+" action button component**
+- [x] **3.1 Floating "+" action button component**
   - Fixed position: bottom-right, above nav bar (safe area aware)
   - Visible on all tabs (Dia, Backlog, SOS)
   - Tapping opens task creation modal/drawer
@@ -266,7 +268,7 @@ _Enable users to create, edit, and delete tasks through the UI. This is the core
   - Files: `components/fab.tsx`, update `app/home/page.tsx`
   - Ref: Spec 02, Spec 05
 
-- [ ] **3.2 Task creation modal/drawer**
+- [x] **3.2 Task creation modal/drawer**
   - Slide-up drawer or centered modal (mobile-optimized)
   - Required fields: name (text, min 2 chars), category (select), primary_person (select, default=logged-in user), recurrence type (select, default='none'), periods (multi-select chips)
   - Conditional fields based on recurrence type:
@@ -282,7 +284,7 @@ _Enable users to create, edit, and delete tasks through the UI. This is the core
   - Files: `components/task-form.tsx`, `components/task-create-modal.tsx`
   - Ref: Spec 02, Spec 05
 
-- [ ] **3.3 Recurrence UI with conditional fields and preview text**
+- [x] **3.3 Recurrence UI with conditional fields and preview text**
   - Reusable recurrence configuration component used in both create and edit
   - Type selector: Diario, Semanal, Mensal, Anual, Sem data
   - Conditional field rendering per type (as described in 3.2)
@@ -290,7 +292,7 @@ _Enable users to create, edit, and delete tasks through the UI. This is the core
   - Files: `components/recurrence-config.tsx`
   - Ref: Spec 03
 
-- [ ] **3.4 Task edit modal (triggered by long press)**
+- [x] **3.4 Task edit modal (triggered by long press)**
   - Same form as creation but pre-populated with existing task data
   - All fields editable (required + optional)
   - "Como fazer" section: manage task_steps (add/remove/reorder text items)
@@ -300,7 +302,7 @@ _Enable users to create, edit, and delete tasks through the UI. This is the core
   - Files: `components/task-edit-modal.tsx`
   - Ref: Spec 02
 
-- [ ] **3.5 Long press detection hook**
+- [x] **3.5 Long press detection hook**
   - `useLongPress(callback, delay=500ms)` -- returns event handlers for touch and mouse
   - Detects press-and-hold on both mobile (touch) and desktop (mouse)
   - Cancels if finger/cursor moves significantly (> 10px)
@@ -308,7 +310,7 @@ _Enable users to create, edit, and delete tasks through the UI. This is the core
   - Files: `lib/hooks/use-long-press.ts`
   - Ref: Spec 02, Spec 04
 
-- [ ] **3.6 Task deletion with confirmation dialog**
+- [x] **3.6 Task deletion with confirmation dialog**
   - Confirmation modal: "Tem certeza? O historico de completions sera mantido."
   - On confirm: DELETE /api/tasks/[id]
   - Cascade deletes recurrence + steps, keeps completions
@@ -316,7 +318,7 @@ _Enable users to create, edit, and delete tasks through the UI. This is the core
   - Files: `components/confirm-dialog.tsx` (reusable)
   - Ref: Spec 02
 
-- [ ] **3.7 Task steps (checklist) management in edit modal**
+- [x] **3.7 Task steps (checklist) management in edit modal**
   - Section "Como fazer" within task edit modal
   - List of text inputs, one per step
   - "+" button to add new step at bottom
@@ -327,7 +329,7 @@ _Enable users to create, edit, and delete tasks through the UI. This is the core
   - Files: integrated into `components/task-edit-modal.tsx`
   - Ref: Spec 02
 
-- [ ] **3.8 Wire long press to open edit modal in FocusView and TimelineView**
+- [x] **3.8 Wire long press to open edit modal in FocusView and TimelineView**
   - Apply `useLongPress` to task cards in FocusView (the main card)
   - Apply `useLongPress` to task rows in TimelineView
   - On long press: open TaskEditModal with the pressed task's data

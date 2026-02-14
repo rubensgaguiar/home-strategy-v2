@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { DayOfWeek, Person } from '@/lib/types';
+import { DayOfWeek, Person, TaskComplete } from '@/lib/types';
 import {
   DAYS, DAY_SHORT, DAY_LABELS, getTodayDayOfWeek, getGreeting,
-  getDateForDay, formatDate, getDbTasksForDate, filterByPersonDb, getDbDayStats,
+  getDateForDay, formatDate, getDbTasksForDate, getDbDayStats,
 } from '@/lib/helpers';
 import { useTasks } from '@/lib/hooks/use-tasks';
 import { useCompletions } from '@/lib/hooks/use-completions';
@@ -14,6 +14,9 @@ import { FocusView } from '@/components/focus-view';
 import { TimelineView } from '@/components/timeline-view';
 import { EmergencyView } from '@/components/emergency-view';
 import { BacklogView } from '@/components/backlog-view';
+import { Fab } from '@/components/fab';
+import { TaskCreateModal } from '@/components/task-create-modal';
+import { TaskEditModal } from '@/components/task-edit-modal';
 
 const authDisabled = process.env.NEXT_PUBLIC_AUTH_DISABLED === 'true';
 
@@ -39,8 +42,12 @@ export default function HomePage() {
   const detectedPerson = useCurrentPerson();
   const [personFilter, setPersonFilter] = useState<PersonFilter>(detectedPerson ?? 'todos');
 
+  // Modals
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskComplete | null>(null);
+
   // API-backed data
-  const { tasks, isLoading: tasksLoading } = useTasks();
+  const { tasks, isLoading: tasksLoading, refetch } = useTasks();
   const selectedDate = getDateForDay(selectedDay);
   const dateStr = formatDate(selectedDate);
   const { isChecked, markDone, markNotDone, undo, getStatus } = useCompletions(dateStr);
@@ -60,6 +67,10 @@ export default function HomePage() {
 
   const progressPct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
   const personName = personFilter === 'rubens' ? 'Rubens' : personFilter === 'diene' ? 'Diene' : '';
+
+  const handleEditTask = useCallback((task: TaskComplete) => {
+    setEditingTask(task);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -205,6 +216,7 @@ export default function HomePage() {
             getStatus={getStatus}
             onMarkDone={markDone}
             onMarkNotDone={markNotDone}
+            onEditTask={handleEditTask}
           />
         )}
         {activeTab === 'dia' && !tasksLoading && viewMode === 'lista' && (
@@ -217,11 +229,29 @@ export default function HomePage() {
             onMarkDone={markDone}
             onMarkNotDone={markNotDone}
             onUndo={undo}
+            onEditTask={handleEditTask}
           />
         )}
         {activeTab === 'emergencia' && <EmergencyView />}
-        {activeTab === 'pendencias' && <BacklogView tasks={tasks} isLoading={tasksLoading} />}
+        {activeTab === 'pendencias' && <BacklogView tasks={tasks} isLoading={tasksLoading} onEditTask={handleEditTask} />}
       </main>
+
+      {/* ── FAB ─────────────────────────────────────────────── */}
+      <Fab onClick={() => setShowCreateModal(true)} />
+
+      {/* ── Modals ─────────────────────────────────────────── */}
+      <TaskCreateModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={refetch}
+      />
+      <TaskEditModal
+        open={editingTask !== null}
+        task={editingTask}
+        onClose={() => setEditingTask(null)}
+        onUpdated={refetch}
+        onDeleted={refetch}
+      />
 
       {/* ── Bottom Navigation ─────────────────────────────────── */}
       <nav className="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-lg border-t border-border safe-bottom z-50">

@@ -4,13 +4,20 @@ import { useMemo } from 'react';
 import { TaskComplete } from '@/lib/types';
 import { categoryDisplayName } from '@/lib/types';
 import { categoryDbIcon, getPersonStyle } from '@/lib/helpers';
+import { useLongPress } from '@/lib/hooks/use-long-press';
 
 interface Props {
   tasks: TaskComplete[];
   isLoading: boolean;
+  onEditTask?: (task: TaskComplete) => void;
 }
 
-export function BacklogView({ tasks, isLoading }: Props) {
+function BacklogTaskRow({ task, children, onEdit }: { task: TaskComplete; children: React.ReactNode; onEdit?: (task: TaskComplete) => void }) {
+  const handlers = useLongPress(() => onEdit?.(task));
+  return <div {...handlers}>{children}</div>;
+}
+
+export function BacklogView({ tasks, isLoading, onEditTask }: Props) {
   // Backlog = tasks with recurrence type 'none' (previously frequency 'S')
   const backlogTasks = useMemo(() => {
     return tasks.filter((t) => t.recurrence.type === 'none');
@@ -68,13 +75,15 @@ export function BacklogView({ tasks, isLoading }: Props) {
                   {items.map((task) => {
                     const ps = getPersonStyle(task.primaryPerson);
                     return (
-                      <div key={task.id} className="px-4 py-2.5 flex items-center gap-3">
-                        <span className="w-1.5 h-1.5 rounded-full bg-border shrink-0" />
-                        <span className="text-[13px] text-foreground/80 flex-1 min-w-0 truncate">
-                          {task.name}
-                        </span>
-                        <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${ps.dot}`} />
-                      </div>
+                      <BacklogTaskRow key={task.id} task={task} onEdit={onEditTask}>
+                        <div className="px-4 py-2.5 flex items-center gap-3">
+                          <span className="w-1.5 h-1.5 rounded-full bg-border shrink-0" />
+                          <span className="text-[13px] text-foreground/80 flex-1 min-w-0 truncate">
+                            {task.name}
+                          </span>
+                          <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${ps.dot}`} />
+                        </div>
+                      </BacklogTaskRow>
                     );
                   })}
                 </div>

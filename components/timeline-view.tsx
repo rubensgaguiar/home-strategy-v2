@@ -13,6 +13,7 @@ import {
   groupByCategoryDb,
   getPlanBDb,
 } from '@/lib/helpers';
+import { useLongPress } from '@/lib/hooks/use-long-press';
 
 interface Props {
   tasks: TaskComplete[];
@@ -23,6 +24,12 @@ interface Props {
   onMarkDone: (taskId: number) => void;
   onMarkNotDone: (taskId: number) => void;
   onUndo: (taskId: number) => void;
+  onEditTask?: (task: TaskComplete) => void;
+}
+
+function TaskRow({ task, children, onEdit }: { task: TaskComplete; children: React.ReactNode; onEdit?: (task: TaskComplete) => void }) {
+  const handlers = useLongPress(() => onEdit?.(task));
+  return <div {...handlers}>{children}</div>;
 }
 
 const periodAccent: Record<Period, { line: string; dot: string; header: string }> = {
@@ -43,7 +50,7 @@ const periodAccent: Record<Period, { line: string; dot: string; header: string }
   },
 };
 
-export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onMarkDone, onMarkNotDone, onUndo }: Props) {
+export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onMarkDone, onMarkNotDone, onUndo, onEditTask }: Props) {
   const currentPeriod = isToday ? getCurrentPeriod() : null;
   const [collapsedPeriods, setCollapsedPeriods] = useState<Set<Period>>(new Set());
   const [expandedPlanB, setExpandedPlanB] = useState<number | null>(null);
@@ -148,7 +155,8 @@ export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onM
                         const planBExpanded = expandedPlanB === task.id;
 
                         return (
-                          <div key={task.id} className="py-1.5">
+                          <TaskRow key={task.id} task={task} onEdit={onEditTask}>
+                            <div className="py-1.5">
                             <div className="flex items-center gap-2.5 group">
                               {/* 3-state checkbox */}
                               <button
@@ -250,6 +258,7 @@ export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onM
                               </div>
                             )}
                           </div>
+                          </TaskRow>
                         );
                       })}
                     </div>

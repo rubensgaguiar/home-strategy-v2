@@ -12,6 +12,7 @@ import {
   getPlanBDb,
 } from '@/lib/helpers';
 import { categoryDisplayName } from '@/lib/types';
+import { useLongPress } from '@/lib/hooks/use-long-press';
 import { ProgressRing } from './progress-ring';
 
 interface Props {
@@ -22,9 +23,10 @@ interface Props {
   getStatus: (taskId: number) => CompletionStatus | null;
   onMarkDone: (taskId: number) => void;
   onMarkNotDone: (taskId: number) => void;
+  onEditTask?: (task: TaskComplete) => void;
 }
 
-export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMarkDone, onMarkNotDone }: Props) {
+export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMarkDone, onMarkNotDone, onEditTask }: Props) {
   const [showPlanB, setShowPlanB] = useState(false);
 
   const { queue, stats } = useMemo(() => {
@@ -94,6 +96,12 @@ export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMark
     setShowPlanB(false);
   }
 
+  const longPressHandlers = useLongPress(() => {
+    if (currentItem && onEditTask) {
+      onEditTask(currentItem.task);
+    }
+  });
+
   // ── All done ─────────────────────────────────────────────
   if (!currentItem) {
     return (
@@ -126,7 +134,7 @@ export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMark
       </div>
 
       {/* Card */}
-      <div className="w-full bg-surface rounded-3xl border border-border shadow-sm overflow-hidden animate-slide-up">
+      <div className="w-full bg-surface rounded-3xl border border-border shadow-sm overflow-hidden animate-slide-up" {...longPressHandlers}>
         {/* Period + badges */}
         <div className="px-5 pt-5 flex items-center gap-2 flex-wrap">
           <span className="text-[13px] leading-none">{periodInfo?.icon}</span>

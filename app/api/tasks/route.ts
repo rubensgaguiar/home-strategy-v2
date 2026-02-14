@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     return jsonError('Invalid JSON body', 400);
   }
 
-  const { name, category, primaryPerson, secondaryPerson, planB, optional, protocolId,
+  const { name, category, primaryPerson, secondaryPerson, planB, optional, repetitions, protocolId,
     recurrence, steps } = body as {
     name?: string;
     category?: string;
@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
     secondaryPerson?: string;
     planB?: string;
     optional?: boolean;
+    repetitions?: string;
     protocolId?: number;
     recurrence?: {
       type: string;
@@ -90,6 +91,7 @@ export async function POST(request: NextRequest) {
       category: category as 'cozinha' | 'pedro' | 'ester' | 'casa' | 'pessoal' | 'espiritual' | 'compras',
       primaryPerson: primaryPerson as 'rubens' | 'diene' | 'juntos',
       secondaryPerson: (secondaryPerson as 'rubens' | 'diene' | 'juntos') || null,
+      repetitions: (repetitions as string) || null,
       planB: (planB as string) || null,
       optional: optional ?? false,
       sortOrder: nextSortOrder,
