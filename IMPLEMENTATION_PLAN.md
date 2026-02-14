@@ -459,33 +459,29 @@ _Ensure users don't forget to check tasks. Critical for a family with small chil
 
 ## Phase 9 -- Dashboard & Analytics
 
+> **Status: COMPLETED** — Analytics summary API with week and month periods. Week view: bar chart of 7 days, week-over-week comparison, category and person breakdown. Month view: calendar heat map, best/worst day, most skipped tasks (min 5 appearances). Streak calculation: consecutive days >= 80% essential completion, looking back 90 days. Dashboard accessible as 4th tab "Stats" in bottom navigation with bar chart icon.
+
 _Visibility into historical performance helps optimize routines over time. See `specs/10-dashboard-analytics.md`._
 
-- [ ] **9.1 Analytics summary API**
-  - `GET /api/analytics/summary?period=week|month` -- returns pre-calculated metrics
-  - Completion rate per day, per category, per person
-  - Streak calculation (consecutive days >= 80%)
-  - Top skipped tasks (lowest completion rate over 30 days)
-  - Week-over-week comparison
+- [x] **9.1 Analytics summary API**
+  - `GET /api/analytics/summary?period=week|month` — server-side calculation
+  - Week: daily rates, category/person breakdown, week-over-week delta, streak
+  - Month: daily heat map data, best/worst day, most skipped tasks, streak
   - Files: `app/api/analytics/summary/route.ts`
-  - Ref: Spec 10
 
-- [ ] **9.2 Dashboard view**
-  - New section accessible from navigation or user menu
-  - Weekly view: bar chart of last 7 days, streak counter, best/worst category, person distribution
-  - Monthly view: calendar heat map (green/yellow/red per day), monthly averages
-  - Tasks needing attention (top 3-5 most skipped)
-  - Mobile-first card layout
-  - Files: `components/dashboard-view.tsx`
-  - Ref: Spec 10
+- [x] **9.2 Dashboard view**
+  - 4th tab "Stats" in bottom navigation with bar chart icon
+  - Week toggle / Month toggle
+  - Weekly: overall rate card with delta, streak with fire icon, bar chart, category bars, person cards
+  - Monthly: rate card, streak, calendar heat map (Mon-based), legend, best/worst day, "needs attention" tasks
+  - Color-coded: green >=80%, amber >=50%, red <50%
+  - Files: `components/dashboard-view.tsx`, `app/home/page.tsx`
 
-- [ ] **9.3 Streak tracking**
-  - Calculate consecutive days with >= 80% essential task completion
-  - Display prominently in dashboard (big number + fire icon)
-  - Personal record saved in DB or localStorage
-  - Streak breaks if a day falls below 80%
-  - Files: integrated into dashboard + API
-  - Ref: Spec 10
+- [x] **9.3 Streak tracking**
+  - Calculated server-side in analytics API (up to 90 days back)
+  - Displayed with big number + fire emoji in both week and month views
+  - Streak breaks when a day with tasks falls below 80%
+  - Files: integrated into `app/api/analytics/summary/route.ts`
 
 ---
 
