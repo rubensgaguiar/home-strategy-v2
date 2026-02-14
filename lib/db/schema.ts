@@ -46,7 +46,7 @@ export const tasks = pgTable('tasks', {
   category: categoryEnum('category').notNull(),
   primaryPerson: personEnum('primary_person').notNull(),
   secondaryPerson: personEnum('secondary_person'),
-  repetitions: text('repetitions'),
+
   planB: text('plan_b'),
   optional: boolean('optional').default(false).notNull(),
   sortOrder: integer('sort_order').default(0).notNull(),
@@ -94,7 +94,7 @@ export const protocols = pgTable('protocols', {
 
 export const taskCompletions = pgTable('task_completions', {
   id: serial('id').primaryKey(),
-  taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }).notNull(),
+  taskId: integer('task_id').references(() => tasks.id, { onDelete: 'set null' }),
   date: date('date').notNull(),
   status: completionStatusEnum('status').notNull(),
   userEmail: text('user_email').notNull(),

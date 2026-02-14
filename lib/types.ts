@@ -57,7 +57,7 @@ export interface Task {
   primary: Person;
   secondary?: Person | null;
   category: Category;
-  repetitions?: string;
+
   planB?: string | null;
   optional?: boolean;
 }

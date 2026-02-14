@@ -34,7 +34,7 @@ function taskToFormData(task: TaskComplete): Partial<TaskFormData> {
     secondaryPerson: task.secondaryPerson,
     planB: task.planB ?? '',
     optional: task.optional,
-    repetitions: task.repetitions ?? '',
+
     protocolId: task.protocolId,
     recurrence,
     steps: task.steps.map((s) => s.description),
@@ -80,7 +80,7 @@ export function TaskEditModal({ open, task, onClose, onUpdated, onDeleted }: Pro
       secondaryPerson: data.secondaryPerson,
       planB: data.planB || null,
       optional: data.optional,
-      repetitions: data.repetitions || null,
+
       protocolId: data.protocolId,
       recurrence: {
         type: data.recurrence.type,

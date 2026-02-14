@@ -73,7 +73,7 @@ async function buildWeekSummary(allTasks: TaskComplete[], today: Date, userEmail
   for (const c of completions) {
     const dateStr = typeof c.date === 'string' ? c.date : formatDate(new Date(c.date));
     if (!completionMap.has(dateStr)) completionMap.set(dateStr, new Map());
-    completionMap.get(dateStr)!.set(c.taskId, c.status);
+    if (c.taskId !== null) completionMap.get(dateStr)!.set(c.taskId, c.status);
   }
 
   // Build daily stats for current week
@@ -176,7 +176,7 @@ async function buildMonthSummary(allTasks: TaskComplete[], today: Date, userEmai
   for (const c of completions) {
     const dateStr = typeof c.date === 'string' ? c.date : formatDate(new Date(c.date));
     if (!completionMap.has(dateStr)) completionMap.set(dateStr, new Map());
-    completionMap.get(dateStr)!.set(c.taskId, c.status);
+    if (c.taskId !== null) completionMap.get(dateStr)!.set(c.taskId, c.status);
   }
 
   // Build daily stats

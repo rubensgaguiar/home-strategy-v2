@@ -41,7 +41,7 @@ export function TaskCreateModal({ open, onClose, onCreated }: Props) {
       secondaryPerson: data.secondaryPerson,
       planB: data.planB || null,
       optional: data.optional,
-      repetitions: data.repetitions || null,
+
       recurrence: {
         type: data.recurrence.type,
         interval: data.recurrence.interval,

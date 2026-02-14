@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { TaskComplete, RecurrenceType, CategoryDb, Person } from '@/lib/types';
+import { TaskComplete, RecurrenceType, CategoryDb, Person, Period } from '@/lib/types';
 import { categoryDisplayName } from '@/lib/types';
 import { categoryDbIcon, getPersonStyle } from '@/lib/helpers';
 import { describeRecurrence } from '@/lib/recurrence';
@@ -27,6 +27,14 @@ const CATEGORY_OPTIONS: CategoryDb[] = [
   'cozinha', 'pedro', 'ester', 'casa', 'pessoal', 'espiritual', 'compras',
 ];
 
+const PERIOD_OPTIONS: { id: Period; label: string; icon: string }[] = [
+  { id: 'MA', label: 'Manha', icon: '☀️' },
+  { id: 'TA', label: 'Tarde', icon: '🌤' },
+  { id: 'NO', label: 'Noite', icon: '🌙' },
+];
+
+const ALL_PERIODS: Set<Period> = new Set(['MA', 'TA', 'NO']);
+
 const freqBadgeStyle: Record<RecurrenceType, string> = {
   daily: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300',
   weekly: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
@@ -41,6 +49,8 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
     new Set(['weekly', 'monthly', 'yearly', 'none'])
   );
   const [catFilters, setCatFilters] = useState<Set<CategoryDb>>(new Set(CATEGORY_OPTIONS));
+  const [periodFilters, setPeriodFilters] = useState<Set<Period>>(new Set(ALL_PERIODS));
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const toggleFreq = useCallback((f: FreqFilter) => {
     setFreqFilters((prev) => {
@@ -60,6 +70,15 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
     });
   }, []);
 
+  const togglePeriod = useCallback((p: Period) => {
+    setPeriodFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(p)) next.delete(p);
+      else next.add(p);
+      return next;
+    });
+  }, []);
+
   const filtered = useMemo(() => {
     return tasks.filter((t) => {
       if (!freqFilters.has(t.recurrence.type)) return false;
@@ -67,9 +86,17 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
       if (person !== 'todos') {
         if (t.primaryPerson !== person && t.primaryPerson !== 'juntos') return false;
       }
+      // Period filter: inbox tasks (type === 'none') always pass
+      if (t.recurrence.type !== 'none') {
+        const taskPeriods = t.recurrence.periods ?? [];
+        if (taskPeriods.length > 0) {
+          const hasMatch = taskPeriods.some((p) => periodFilters.has(p as Period));
+          if (!hasMatch) return false;
+        }
+      }
       return true;
     });
-  }, [tasks, freqFilters, catFilters, person]);
+  }, [tasks, freqFilters, catFilters, periodFilters, person]);
 
   // Inbox tasks (recurrence.type === 'none')
   const inboxTasks = useMemo(() => filtered.filter((t) => t.recurrence.type === 'none'), [filtered]);
@@ -137,62 +164,131 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
         </p>
       </div>
 
-      {/* Filters */}
-      <div className="space-y-2">
-        <div className="flex flex-wrap gap-1">
-          {FREQ_OPTIONS.map((f) => {
-            const isActive = freqFilters.has(f.id);
-            return (
-              <button
-                key={f.id}
-                onClick={() => toggleFreq(f.id)}
-                className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all tap-highlight ${
-                  isActive
-                    ? freqBadgeStyle[f.id]
-                    : 'text-muted/80 bg-surface-hover border border-border-subtle'
-                }`}
-              >
-                {f.label}
-                {f.id === 'none' && inboxCount > 0 && (
-                  <span className="ml-1 px-1 py-0 rounded-full bg-red-500 text-white text-[9px] font-bold">
-                    {inboxCount}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex flex-wrap gap-1">
-          {CATEGORY_OPTIONS.map((c) => {
-            const isActive = catFilters.has(c);
-            return (
-              <button
-                key={c}
-                onClick={() => toggleCat(c)}
-                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-all tap-highlight flex items-center gap-1 ${
-                  isActive
-                    ? 'bg-surface text-foreground border border-border'
-                    : 'text-muted/80 bg-surface-hover border border-border-subtle'
-                }`}
-              >
-                <span className="text-[12px]">{categoryDbIcon[c]}</span>
-                {categoryDisplayName[c]}
-              </button>
-            );
-          })}
-          <button
-            onClick={() => {
-              if (catFilters.size === CATEGORY_OPTIONS.length) {
-                setCatFilters(new Set());
-              } else {
-                setCatFilters(new Set(CATEGORY_OPTIONS));
-              }
-            }}
-            className="px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-all tap-highlight text-accent border border-accent/30 bg-accent/5"
+      {/* Filters card (collapsible) */}
+      <div className="bg-surface rounded-2xl border border-border overflow-hidden">
+        {/* Toggle header */}
+        <button
+          onClick={() => setFiltersOpen(!filtersOpen)}
+          className="w-full px-4 py-2.5 flex items-center gap-2 tap-highlight"
+        >
+          <svg className="w-3.5 h-3.5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+          </svg>
+          <span className="text-[12px] font-semibold text-foreground">Filtros</span>
+          {!filtersOpen && (freqFilters.size < FREQ_OPTIONS.length || catFilters.size < CATEGORY_OPTIONS.length || periodFilters.size < ALL_PERIODS.size) && (
+            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+          )}
+          <svg
+            className={`w-3.5 h-3.5 text-muted ml-auto transition-transform duration-200 ${filtersOpen ? 'rotate-180' : ''}`}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}
           >
-            {catFilters.size === CATEGORY_OPTIONS.length ? 'Limpar' : 'Todas'}
-          </button>
-        </div>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {filtersOpen && (
+          <div className="animate-slide-down">
+            <div className="mx-4 border-t border-border-subtle" />
+
+            {/* Frequency section */}
+            <div className="px-4 pt-2.5 pb-2.5">
+              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider">Frequencia</span>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {FREQ_OPTIONS.map((f) => {
+                  const isActive = freqFilters.has(f.id);
+                  return (
+                    <button
+                      key={f.id}
+                      onClick={() => toggleFreq(f.id)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all tap-highlight ${
+                        isActive
+                          ? freqBadgeStyle[f.id]
+                          : 'text-muted/50 border border-border-subtle'
+                      }`}
+                    >
+                      {f.label}
+                      {f.id === 'none' && inboxCount > 0 && (
+                        <span className="ml-1 px-1 py-0 rounded-full bg-red-500 text-white text-[9px] font-bold">
+                          {inboxCount}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mx-4 border-t border-border-subtle" />
+
+            {/* Category section */}
+            <div className="px-4 pt-2.5 pb-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-muted uppercase tracking-wider">Categoria</span>
+                <button
+                  onClick={() => {
+                    if (catFilters.size === CATEGORY_OPTIONS.length) {
+                      setCatFilters(new Set());
+                    } else {
+                      setCatFilters(new Set(CATEGORY_OPTIONS));
+                    }
+                  }}
+                  className="text-[10px] font-semibold text-accent tap-highlight"
+                >
+                  {catFilters.size === CATEGORY_OPTIONS.length ? 'Limpar' : 'Todas'}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {CATEGORY_OPTIONS.map((c) => {
+                  const isActive = catFilters.has(c);
+                  return (
+                    <button
+                      key={c}
+                      onClick={() => toggleCat(c)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all tap-highlight flex items-center gap-1 ${
+                        isActive
+                          ? 'bg-foreground/10 text-foreground dark:bg-foreground/15'
+                          : 'text-muted/50 border border-border-subtle'
+                      }`}
+                    >
+                      <span className="text-[11px]">{categoryDbIcon[c]}</span>
+                      {categoryDisplayName[c]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mx-4 border-t border-border-subtle" />
+
+            {/* Period section */}
+            <div className="px-4 pt-2.5 pb-3">
+              <span className="text-[10px] font-semibold text-muted uppercase tracking-wider">Turno</span>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {PERIOD_OPTIONS.map((p) => {
+                  const isActive = periodFilters.has(p.id);
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => togglePeriod(p.id)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all tap-highlight flex items-center gap-1 ${
+                        isActive
+                          ? p.id === 'MA'
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                            : p.id === 'TA'
+                            ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300'
+                            : 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'
+                          : 'text-muted/50 border border-border-subtle'
+                      }`}
+                    >
+                      <span className="text-[11px]">{p.icon}</span>
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Loading */}
@@ -252,13 +348,6 @@ export function BacklogView({ tasks, isLoading, person, onEditTask }: Props) {
           )}
         </div>
       )}
-
-      {/* Footer note */}
-      <div className="bg-surface-hover rounded-xl px-4 py-3">
-        <p className="text-[11px] text-muted leading-relaxed text-center">
-          Toque para editar.
-        </p>
-      </div>
     </div>
   );
 }

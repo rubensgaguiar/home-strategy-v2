@@ -65,7 +65,7 @@ interface OldTask {
   primary: 'rubens' | 'diene' | 'juntos';
   secondary?: 'rubens' | 'diene' | 'juntos' | null;
   category: OldCategory;
-  repetitions?: string;
+
   planB?: string | null;
   optional?: boolean;
 }
@@ -99,10 +99,10 @@ const oldTasks: OldTask[] = [
   { id: 'filme-pedro', name: 'Filme com Pedro', frequency: 'W', periods: ['TA'], daysOfWeek: ['domingo'], primary: 'rubens', secondary: 'diene', category: 'Pedro', planB: 'Desenho curto no tablet. Ou outro dia.' },
   { id: 'definir-metas-pedro', name: 'Definir metas Pedro', frequency: 'W', periods: ['NO'], daysOfWeek: ['domingo'], primary: 'juntos', category: 'Pedro', planB: 'Adiar pra proxima semana.' },
   // ESTER
-  { id: 'amamentar', name: 'Amamentar', frequency: 'T', periods: ['MA', 'TA'], primary: 'diene', category: 'Ester', repetitions: 'N vezes', planB: null },
-  { id: 'limpar-coco-ester', name: 'Limpar coco Ester', frequency: 'T', periods: ['MA', 'TA'], primary: 'diene', secondary: 'rubens', category: 'Ester', repetitions: 'N vezes', planB: null },
+  { id: 'amamentar', name: 'Amamentar', frequency: 'T', periods: ['MA', 'TA'], primary: 'diene', category: 'Ester', planB: null },
+  { id: 'limpar-coco-ester', name: 'Limpar coco Ester', frequency: 'T', periods: ['MA', 'TA'], primary: 'diene', secondary: 'rubens', category: 'Ester', planB: null },
   { id: 'tummy-time', name: 'Tummy time Ester', frequency: 'T', periods: ['MA'], primary: 'diene', secondary: 'rubens', category: 'Ester', planB: 'Pular. Compensar amanha ou ao longo do dia.' },
-  { id: 'colocar-ester-dormir', name: 'Colocar Ester pra dormir', frequency: 'T', periods: ['MA', 'TA'], primary: 'diene', secondary: 'rubens', category: 'Ester', repetitions: 'N vezes', planB: 'Colo, embalar, sling.' },
+  { id: 'colocar-ester-dormir', name: 'Colocar Ester pra dormir', frequency: 'T', periods: ['MA', 'TA'], primary: 'diene', secondary: 'rubens', category: 'Ester', planB: 'Colo, embalar, sling.' },
   { id: 'trocar-agua-garrafa-ester', name: 'Trocar agua da garrafa termica Ester', frequency: 'T', periods: ['NO'], primary: 'diene', secondary: 'rubens', category: 'Ester', planB: 'Se esquecer, fazer de manha cedo.' },
   // CASA
   { id: 'roupa-criancas', name: 'Lavar roupa das criancas', frequency: 'T', periods: ['NO'], primary: 'diene', secondary: 'rubens', category: 'Casa', planB: 'Usar roupa reserva. Lavar amanha cedo.' },
@@ -222,7 +222,7 @@ async function seed() {
       category: categoryMap[t.category],
       primaryPerson: t.primary,
       secondaryPerson: t.secondary || null,
-      repetitions: t.repetitions || null,
+
       planB: t.planB || null,
       optional: t.optional || false,
       sortOrder: i,

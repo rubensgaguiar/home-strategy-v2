@@ -44,7 +44,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     return jsonError('Invalid JSON body', 400);
   }
 
-  const { name, category, primaryPerson, secondaryPerson, planB, optional, repetitions, protocolId,
+  const { name, category, primaryPerson, secondaryPerson, planB, optional, protocolId,
     sortOrder, recurrence, steps } = body as {
     name?: string;
     category?: string;
@@ -52,7 +52,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
     secondaryPerson?: string | null;
     planB?: string | null;
     optional?: boolean;
-    repetitions?: string | null;
     protocolId?: number | null;
     sortOrder?: number;
     recurrence?: {
@@ -76,7 +75,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     if (secondaryPerson !== undefined) taskUpdate.secondaryPerson = secondaryPerson;
     if (planB !== undefined) taskUpdate.planB = planB;
     if (optional !== undefined) taskUpdate.optional = optional;
-    if (repetitions !== undefined) taskUpdate.repetitions = repetitions;
+
     if (protocolId !== undefined) taskUpdate.protocolId = protocolId;
     if (sortOrder !== undefined) taskUpdate.sortOrder = sortOrder;
 

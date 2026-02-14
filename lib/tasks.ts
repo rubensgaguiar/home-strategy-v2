@@ -239,7 +239,6 @@ export const tasks: Task[] = [
     periods: ['MA', 'TA'],
     primary: 'diene',
     category: 'Ester',
-    repetitions: 'N vezes',
     planB: null,
   },
   {
@@ -250,7 +249,6 @@ export const tasks: Task[] = [
     primary: 'diene',
     secondary: 'rubens',
     category: 'Ester',
-    repetitions: 'N vezes',
     planB: null,
   },
   {
@@ -271,7 +269,6 @@ export const tasks: Task[] = [
     primary: 'diene',
     secondary: 'rubens',
     category: 'Ester',
-    repetitions: 'N vezes',
     planB: 'Colo, embalar, sling.',
   },
   {

@@ -26,7 +26,7 @@ export function useCompletions(date: string) {
           // Only update if no pending writes to avoid clobbering optimistic state
           if (pendingRef.current.size === 0) {
             const map = new Map<number, DbTaskCompletion>();
-            data.forEach((c) => map.set(c.taskId, c));
+            data.forEach((c) => { if (c.taskId !== null) map.set(c.taskId, c); });
             setCompletions(map);
           }
         }

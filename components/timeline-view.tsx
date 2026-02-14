@@ -296,9 +296,6 @@ export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onM
                                     }`}
                                   >
                                     {task.name}
-                                    {task.repetitions && (
-                                      <span className="text-[10px] text-muted ml-1">{task.repetitions}</span>
-                                    )}
                                     {task.optional && (
                                       <span className="text-[10px] text-muted ml-1 not-italic uppercase font-medium">
                                         opc

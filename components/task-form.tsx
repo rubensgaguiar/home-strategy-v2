@@ -11,7 +11,7 @@ export interface TaskFormData {
   secondaryPerson: Person | null;
   planB: string;
   optional: boolean;
-  repetitions: string;
+
   protocolId: number | null;
   recurrence: RecurrenceFormData;
   steps: string[];
@@ -57,11 +57,11 @@ export function TaskForm({ initial, onSubmit, submitLabel, isLoading }: Props) {
   const [secondaryPerson, setSecondaryPerson] = useState<Person | null>(initial?.secondaryPerson ?? null);
   const [planB, setPlanB] = useState(initial?.planB ?? '');
   const [optional, setOptional] = useState(initial?.optional ?? false);
-  const [repetitions, setRepetitions] = useState(initial?.repetitions ?? '');
+
   const [recurrence, setRecurrence] = useState<RecurrenceFormData>(initial?.recurrence ?? DEFAULT_RECURRENCE);
   const [steps, setSteps] = useState<string[]>(initial?.steps ?? []);
   const [showAdvanced, setShowAdvanced] = useState(
-    !!(initial?.secondaryPerson || initial?.planB || initial?.optional || (initial?.steps && initial.steps.length > 0) || initial?.repetitions)
+    !!(initial?.secondaryPerson || initial?.planB || initial?.optional || (initial?.steps && initial.steps.length > 0))
   );
   const [error, setError] = useState<string | null>(null);
 
@@ -86,7 +86,7 @@ export function TaskForm({ initial, onSubmit, submitLabel, isLoading }: Props) {
       secondaryPerson,
       planB: planB.trim() || '',
       optional,
-      repetitions: repetitions.trim(),
+
       protocolId: initial?.protocolId ?? null,
       recurrence,
       steps: steps.filter((s) => s.trim().length > 0),
@@ -193,20 +193,6 @@ export function TaskForm({ initial, onSubmit, submitLabel, isLoading }: Props) {
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
-          </div>
-
-          {/* Repetitions */}
-          <div>
-            <label className="text-[11px] font-semibold text-muted uppercase tracking-wider block mb-1.5">
-              Repeticoes
-            </label>
-            <input
-              type="text"
-              value={repetitions}
-              onChange={(e) => setRepetitions(e.target.value)}
-              placeholder="Ex: N vezes, 3x ao dia"
-              className="w-full px-3 py-2.5 rounded-xl border border-border bg-input text-[13px] text-foreground placeholder:text-muted/50"
-            />
           </div>
 
           {/* Plan B */}

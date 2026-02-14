@@ -269,10 +269,9 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Controls (Person + View toggle) ──────────────────── */}
+      {/* ── Person pills (dia + backlog) ──────────────────── */}
       {(activeTab === 'dia' || activeTab === 'backlog') && (
         <div className="px-5 py-2 flex items-center justify-between">
-          {/* Person pills */}
           <div className="flex items-center gap-1">
             {(['rubens', 'diene', 'todos'] as PersonFilter[]).map((pf) => {
               const isActive = personFilter === pf;
@@ -297,8 +296,8 @@ export default function HomePage() {
             })}
           </div>
 
-          {/* View toggle — only for day scope */}
-          {timeScope === 'hoje' && (
+          {/* View toggle — only for dia + hoje */}
+          {activeTab === 'dia' && timeScope === 'hoje' && (
             <div className="flex items-center bg-surface border border-border rounded-xl p-0.5">
               <button
                 onClick={() => setViewMode('foco')}

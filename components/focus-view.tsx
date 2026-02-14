@@ -204,11 +204,7 @@ export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMark
           <h2 className="text-[22px] font-bold text-foreground tracking-tight leading-tight">
             {task.name}
           </h2>
-          {task.repetitions && (
-            <span className="text-[12px] text-muted font-medium mt-0.5 block">
-              {task.repetitions}
-            </span>
-          )}
+
         </div>
 
         {/* Category + Person */}
