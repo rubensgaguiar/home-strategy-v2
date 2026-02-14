@@ -210,6 +210,13 @@ export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onM
                                 )}
                               </span>
 
+                              {/* Steps indicator */}
+                              {task.steps && task.steps.length > 0 && (
+                                <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-accent/10 text-accent">
+                                  como
+                                </span>
+                              )}
+
                               {/* Person dot */}
                               <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${ps.dot}`} />
 

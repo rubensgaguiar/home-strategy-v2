@@ -153,11 +153,11 @@ export function getTasksForDate<T extends TaskWithRecurrence>(date: Date, tasks:
  * Returns tasks grouped by day index (0=Monday...6=Sunday) for a given week.
  * Excludes daily tasks (they'd appear every day and clutter the week view).
  */
-export function getTasksForWeek(
+export function getTasksForWeek<T extends TaskWithRecurrence>(
   weekStart: Date,
-  tasks: TaskWithRecurrence[]
-): Map<number, TaskWithRecurrence[]> {
-  const result = new Map<number, TaskWithRecurrence[]>();
+  tasks: T[]
+): Map<number, T[]> {
+  const result = new Map<number, T[]>();
 
   for (let i = 0; i < 7; i++) {
     const date = new Date(weekStart);
@@ -180,12 +180,12 @@ export function getTasksForWeek(
  * Returns tasks grouped by day of month (1-31) for a given month.
  * Excludes daily and weekly tasks (they'd clutter the month view).
  */
-export function getTasksForMonth(
+export function getTasksForMonth<T extends TaskWithRecurrence>(
   year: number,
   month: number, // 0-based (JS convention)
-  tasks: TaskWithRecurrence[]
-): Map<number, TaskWithRecurrence[]> {
-  const result = new Map<number, TaskWithRecurrence[]>();
+  tasks: T[]
+): Map<number, T[]> {
+  const result = new Map<number, T[]>();
   const lastDay = new Date(year, month + 1, 0).getDate();
 
   for (let d = 1; d <= lastDay; d++) {

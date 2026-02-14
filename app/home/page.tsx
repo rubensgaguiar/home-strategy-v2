@@ -12,6 +12,8 @@ import { useCompletions } from '@/lib/hooks/use-completions';
 import { UserMenu } from '@/components/user-menu';
 import { FocusView } from '@/components/focus-view';
 import { TimelineView } from '@/components/timeline-view';
+import { WeekView } from '@/components/week-view';
+import { MonthView } from '@/components/month-view';
 import { EmergencyView } from '@/components/emergency-view';
 import { BacklogView } from '@/components/backlog-view';
 import { Fab } from '@/components/fab';
@@ -22,7 +24,22 @@ const authDisabled = process.env.NEXT_PUBLIC_AUTH_DISABLED === 'true';
 
 type Tab = 'dia' | 'emergencia' | 'pendencias';
 type ViewMode = 'foco' | 'lista';
+type TimeScope = 'hoje' | 'semana' | 'mes';
 type PersonFilter = Person | 'todos';
+
+const MONTH_NAMES = [
+  'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+];
+
+function getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day === 0 ? 6 : day - 1; // Monday-based
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
 
 function useCurrentPerson(): Person | null {
   const { data: session } = useSession();
@@ -38,6 +55,11 @@ export default function HomePage() {
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>(todayDay);
   const [activeTab, setActiveTab] = useState<Tab>('dia');
   const [viewMode, setViewMode] = useState<ViewMode>('foco');
+  const [timeScope, setTimeScope] = useState<TimeScope>('hoje');
+
+  // Week/month navigation offsets
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [monthOffset, setMonthOffset] = useState(0);
 
   const detectedPerson = useCurrentPerson();
   const [personFilter, setPersonFilter] = useState<PersonFilter>(detectedPerson ?? 'todos');
@@ -65,6 +87,34 @@ export default function HomePage() {
     return getDbDayStats(dateTasks, personFilter, isChecked);
   }, [dateTasks, personFilter, isChecked]);
 
+  // Week navigation
+  const currentWeekStart = useMemo(() => {
+    const base = getWeekStart(new Date());
+    const d = new Date(base);
+    d.setDate(d.getDate() + weekOffset * 7);
+    return d;
+  }, [weekOffset]);
+
+  const weekLabel = useMemo(() => {
+    const end = new Date(currentWeekStart);
+    end.setDate(end.getDate() + 6);
+    const startDay = currentWeekStart.getDate();
+    const endDay = end.getDate();
+    const startMonth = currentWeekStart.getMonth();
+    const endMonth = end.getMonth();
+    if (startMonth === endMonth) {
+      return `${startDay}–${endDay} ${MONTH_NAMES[startMonth]}`;
+    }
+    return `${startDay} ${MONTH_NAMES[startMonth].slice(0, 3)} – ${endDay} ${MONTH_NAMES[endMonth].slice(0, 3)}`;
+  }, [currentWeekStart]);
+
+  // Month navigation
+  const currentMonth = useMemo(() => {
+    const now = new Date();
+    const totalMonths = now.getFullYear() * 12 + now.getMonth() + monthOffset;
+    return { year: Math.floor(totalMonths / 12), month: totalMonths % 12 };
+  }, [monthOffset]);
+
   const progressPct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
   const personName = personFilter === 'rubens' ? 'Rubens' : personFilter === 'diene' ? 'Diene' : '';
 
@@ -82,7 +132,9 @@ export default function HomePage() {
               {greeting}{personName ? `, ${personName}` : ''}
             </h1>
             <p className="text-[13px] text-muted mt-0.5">
-              {DAY_LABELS[selectedDay]}{isToday ? ' \u00B7 Hoje' : ''}
+              {timeScope === 'hoje' && `${DAY_LABELS[selectedDay]}${isToday ? ' · Hoje' : ''}`}
+              {timeScope === 'semana' && (weekOffset === 0 ? 'Esta semana' : weekLabel)}
+              {timeScope === 'mes' && `${MONTH_NAMES[currentMonth.month]} ${currentMonth.year}`}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -90,8 +142,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Progress bar */}
-        {activeTab === 'dia' && (
+        {/* Progress bar — only for day view */}
+        {activeTab === 'dia' && timeScope === 'hoje' && (
           <div className="animate-fade-in">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[11px] font-medium text-muted">
@@ -111,8 +163,37 @@ export default function HomePage() {
         )}
       </header>
 
-      {/* ── Day selector ──────────────────────────────────────── */}
+      {/* ── Time scope switcher (Hoje / Semana / Mes) ─────────── */}
       {activeTab === 'dia' && (
+        <div className="px-5 py-1.5">
+          <div className="flex items-center bg-surface border border-border rounded-xl p-0.5">
+            {(['hoje', 'semana', 'mes'] as TimeScope[]).map((scope) => {
+              const isActive = timeScope === scope;
+              const label = scope === 'hoje' ? 'Hoje' : scope === 'semana' ? 'Semana' : 'Mes';
+              return (
+                <button
+                  key={scope}
+                  onClick={() => {
+                    setTimeScope(scope);
+                    if (scope === 'semana') setWeekOffset(0);
+                    if (scope === 'mes') setMonthOffset(0);
+                  }}
+                  className={`flex-1 py-1.5 text-[12px] font-semibold rounded-lg transition-all duration-200 tap-highlight ${
+                    isActive
+                      ? 'bg-foreground text-background shadow-sm'
+                      : 'text-muted'
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Day selector (only for 'hoje' scope) ──────────────── */}
+      {activeTab === 'dia' && timeScope === 'hoje' && (
         <div className="px-5 py-2">
           <div className="flex gap-1">
             {DAYS.map((day) => {
@@ -139,7 +220,54 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ── Controls (Person + View toggle) ───────────────────── */}
+      {/* ── Week/Month navigation arrows ──────────────────────── */}
+      {activeTab === 'dia' && timeScope === 'semana' && (
+        <div className="px-5 py-2 flex items-center justify-between">
+          <button
+            onClick={() => setWeekOffset((o) => o - 1)}
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-surface border border-border text-muted hover:text-foreground transition-colors tap-highlight"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+          <span className="text-[13px] font-semibold text-foreground">{weekLabel}</span>
+          <button
+            onClick={() => setWeekOffset((o) => o + 1)}
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-surface border border-border text-muted hover:text-foreground transition-colors tap-highlight"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'dia' && timeScope === 'mes' && (
+        <div className="px-5 py-2 flex items-center justify-between">
+          <button
+            onClick={() => setMonthOffset((o) => o - 1)}
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-surface border border-border text-muted hover:text-foreground transition-colors tap-highlight"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+          <span className="text-[13px] font-semibold text-foreground">
+            {MONTH_NAMES[currentMonth.month]} {currentMonth.year}
+          </span>
+          <button
+            onClick={() => setMonthOffset((o) => o + 1)}
+            className="w-8 h-8 flex items-center justify-center rounded-xl bg-surface border border-border text-muted hover:text-foreground transition-colors tap-highlight"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* ── Controls (Person + View toggle) — only for day view ── */}
       {activeTab === 'dia' && (
         <div className="px-5 py-2 flex items-center justify-between">
           {/* Person pills */}
@@ -167,36 +295,38 @@ export default function HomePage() {
             })}
           </div>
 
-          {/* View toggle */}
-          <div className="flex items-center bg-surface border border-border rounded-xl p-0.5">
-            <button
-              onClick={() => setViewMode('foco')}
-              className={`p-1.5 rounded-lg transition-all duration-200 ${
-                viewMode === 'foco'
-                  ? 'bg-foreground text-background shadow-sm'
-                  : 'text-muted'
-              }`}
-              title="Modo Foco"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path d="M9 12h6M12 9v6" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setViewMode('lista')}
-              className={`p-1.5 rounded-lg transition-all duration-200 ${
-                viewMode === 'lista'
-                  ? 'bg-foreground text-background shadow-sm'
-                  : 'text-muted'
-              }`}
-              title="Modo Lista"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
+          {/* View toggle — only for day scope */}
+          {timeScope === 'hoje' && (
+            <div className="flex items-center bg-surface border border-border rounded-xl p-0.5">
+              <button
+                onClick={() => setViewMode('foco')}
+                className={`p-1.5 rounded-lg transition-all duration-200 ${
+                  viewMode === 'foco'
+                    ? 'bg-foreground text-background shadow-sm'
+                    : 'text-muted'
+                }`}
+                title="Modo Foco"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M9 12h6M12 9v6" />
+                </svg>
+              </button>
+              <button
+                onClick={() => setViewMode('lista')}
+                className={`p-1.5 rounded-lg transition-all duration-200 ${
+                  viewMode === 'lista'
+                    ? 'bg-foreground text-background shadow-sm'
+                    : 'text-muted'
+                }`}
+                title="Modo Lista"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -207,7 +337,9 @@ export default function HomePage() {
             <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-        {activeTab === 'dia' && !tasksLoading && viewMode === 'foco' && (
+
+        {/* Day view — Focus mode */}
+        {activeTab === 'dia' && !tasksLoading && timeScope === 'hoje' && viewMode === 'foco' && (
           <FocusView
             tasks={dateTasks}
             isToday={isToday}
@@ -219,7 +351,9 @@ export default function HomePage() {
             onEditTask={handleEditTask}
           />
         )}
-        {activeTab === 'dia' && !tasksLoading && viewMode === 'lista' && (
+
+        {/* Day view — List mode */}
+        {activeTab === 'dia' && !tasksLoading && timeScope === 'hoje' && viewMode === 'lista' && (
           <TimelineView
             tasks={dateTasks}
             isToday={isToday}
@@ -232,6 +366,28 @@ export default function HomePage() {
             onEditTask={handleEditTask}
           />
         )}
+
+        {/* Week view */}
+        {activeTab === 'dia' && !tasksLoading && timeScope === 'semana' && (
+          <WeekView
+            tasks={tasks}
+            weekStart={currentWeekStart}
+            person={personFilter}
+            onEditTask={handleEditTask}
+          />
+        )}
+
+        {/* Month view */}
+        {activeTab === 'dia' && !tasksLoading && timeScope === 'mes' && (
+          <MonthView
+            tasks={tasks}
+            year={currentMonth.year}
+            month={currentMonth.month}
+            person={personFilter}
+            onEditTask={handleEditTask}
+          />
+        )}
+
         {activeTab === 'emergencia' && <EmergencyView />}
         {activeTab === 'pendencias' && <BacklogView tasks={tasks} isLoading={tasksLoading} onEditTask={handleEditTask} />}
       </main>
