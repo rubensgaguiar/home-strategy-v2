@@ -1,49 +1,54 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Task, Period, DayOfWeek, Person } from '@/lib/types';
+import { TaskComplete, CompletionStatus, Person } from '@/lib/types';
 import {
   PERIODS,
-  categoryIcon,
+  categoryDbIcon,
   getPersonStyle,
   getCurrentPeriod,
-  getTasksForDayAndPeriod,
-  filterByPerson,
-  getPlanB,
+  filterByPeriodDb,
+  filterByPersonDb,
+  getPlanBDb,
 } from '@/lib/helpers';
+import { categoryDisplayName } from '@/lib/types';
 import { ProgressRing } from './progress-ring';
 
 interface Props {
-  selectedDay: DayOfWeek;
+  tasks: TaskComplete[];
   isToday: boolean;
   person: Person | 'todos';
-  isChecked: (id: string) => boolean;
-  onCheck: (id: string) => void;
+  isChecked: (taskId: number) => boolean;
+  getStatus: (taskId: number) => CompletionStatus | null;
+  onMarkDone: (taskId: number) => void;
+  onMarkNotDone: (taskId: number) => void;
 }
 
-export function FocusView({ selectedDay, isToday, person, isChecked, onCheck }: Props) {
+export function FocusView({ tasks, isToday, person, isChecked, getStatus, onMarkDone, onMarkNotDone }: Props) {
   const [showPlanB, setShowPlanB] = useState(false);
 
   const { queue, stats } = useMemo(() => {
     const currentPeriod = isToday ? getCurrentPeriod() : null;
-    const periodOrder: Period[] = ['MA', 'TA', 'NO'];
+    const periodOrder = ['MA', 'TA', 'NO'] as const;
 
     let currentIdx = currentPeriod ? periodOrder.indexOf(currentPeriod) : 0;
     if (currentIdx === -1) currentIdx = 0;
 
-    type QueueItem = { task: Task; period: Period; overdue: boolean };
+    type QueueItem = { task: TaskComplete; period: typeof periodOrder[number]; overdue: boolean };
     const items: QueueItem[] = [];
+
+    const personTasks = filterByPersonDb(tasks, person);
 
     // Current period first
     const cp = periodOrder[currentIdx];
-    const ct = filterByPerson(getTasksForDayAndPeriod(selectedDay, cp), person);
+    const ct = filterByPeriodDb(personTasks, cp);
     items.push(...ct.map((task) => ({ task, period: cp, overdue: false })));
 
     // Overdue periods (only if today)
     if (isToday) {
       for (let i = 0; i < currentIdx; i++) {
         const p = periodOrder[i];
-        const t = filterByPerson(getTasksForDayAndPeriod(selectedDay, p), person);
+        const t = filterByPeriodDb(personTasks, p);
         items.push(...t.map((task) => ({ task, period: p, overdue: true })));
       }
     }
@@ -51,7 +56,7 @@ export function FocusView({ selectedDay, isToday, person, isChecked, onCheck }: 
     // Future periods
     for (let i = currentIdx + 1; i < periodOrder.length; i++) {
       const p = periodOrder[i];
-      const t = filterByPerson(getTasksForDayAndPeriod(selectedDay, p), person);
+      const t = filterByPeriodDb(personTasks, p);
       items.push(...t.map((task) => ({ task, period: p, overdue: false })));
     }
 
@@ -69,25 +74,24 @@ export function FocusView({ selectedDay, isToday, person, isChecked, onCheck }: 
         done: items.filter((i) => isChecked(i.task.id)).length,
       },
     };
-  }, [selectedDay, isToday, person, isChecked]);
+  }, [tasks, isToday, person, isChecked]);
 
-  const uncheckedItems = queue.filter((item) => !isChecked(item.task.id));
+  const uncheckedItems = queue.filter((item) => {
+    const status = getStatus(item.task.id);
+    return status !== 'done' && status !== 'not_done';
+  });
   const currentItem = uncheckedItems.length > 0 ? uncheckedItems[0] : null;
 
   function handleDone() {
     if (!currentItem) return;
-    onCheck(currentItem.task.id);
+    onMarkDone(currentItem.task.id);
     setShowPlanB(false);
   }
 
-  function handleSkip() {
+  function handleNotDone() {
     if (!currentItem) return;
-    // Move to end by checking and immediately showing next
-    // Actually just rotate — skip doesn't mark as done
+    onMarkNotDone(currentItem.task.id);
     setShowPlanB(false);
-    // Rotate the unchecked items by checking temporarily... no.
-    // For skip, we just advance the view. But since uncheckedItems is derived,
-    // we need a skip offset.
   }
 
   // ── All done ─────────────────────────────────────────────
@@ -107,7 +111,7 @@ export function FocusView({ selectedDay, isToday, person, isChecked, onCheck }: 
 
   // ── Task card ────────────────────────────────────────────
   const { task, period, overdue } = currentItem;
-  const personStyle = getPersonStyle(task.primary);
+  const personStyle = getPersonStyle(task.primaryPerson);
   const periodInfo = PERIODS.find((p) => p.id === period);
   const progressPct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
 
@@ -153,8 +157,8 @@ export function FocusView({ selectedDay, isToday, person, isChecked, onCheck }: 
 
         {/* Category + Person */}
         <div className="px-5 pb-4 flex items-center gap-2">
-          <span className="text-sm">{categoryIcon[task.category]}</span>
-          <span className="text-[12px] text-muted">{task.category}</span>
+          <span className="text-sm">{categoryDbIcon[task.category]}</span>
+          <span className="text-[12px] text-muted">{categoryDisplayName[task.category]}</span>
           <span className="text-border">&middot;</span>
           <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-lg ${personStyle.bg}`}>
             {personStyle.label}
@@ -182,7 +186,7 @@ export function FocusView({ selectedDay, isToday, person, isChecked, onCheck }: 
             <div className="px-5 pb-4 animate-slide-down">
               <div className="px-3.5 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/40 dark:border-amber-800/30">
                 <p className="text-[12px] text-amber-700 dark:text-amber-300 leading-relaxed">
-                  {getPlanB(task)}
+                  {getPlanBDb(task)}
                 </p>
               </div>
             </div>
@@ -192,6 +196,12 @@ export function FocusView({ selectedDay, isToday, person, isChecked, onCheck }: 
 
       {/* Action buttons */}
       <div className="flex items-center gap-3 mt-5 w-full">
+        <button
+          onClick={handleNotDone}
+          className="flex-1 py-3.5 rounded-2xl text-[14px] font-semibold text-muted bg-surface border border-border hover:bg-surface-hover active:scale-[0.98] transition-all duration-150 tap-highlight"
+        >
+          Nao feito
+        </button>
         <button
           onClick={handleDone}
           className="flex-1 py-3.5 rounded-2xl text-[14px] font-semibold text-white bg-accent hover:brightness-110 active:scale-[0.98] shadow-sm shadow-accent/20 transition-all duration-150 tap-highlight"

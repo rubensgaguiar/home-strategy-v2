@@ -178,9 +178,11 @@ _Expose the database through API routes. This phase replaces hardcoded data impo
 
 ## Phase 2 -- Core Client Migration
 
+> **Status: COMPLETED** — All 9 items implemented. All views now use API-backed data. Key changes: `useCompletions` hook with optimistic updates replaces localStorage-based `useChecks`; `useTasks` fetches all tasks from API; all components use generic DB-type helpers; FocusView has 3-state (Feito/Nao feito) buttons; TimelineView has 3-state checkboxes with inline Feito/Nao feito actions; EmergencyView fetches protocols from API; BacklogView receives tasks as props. Schema was updated to add missing `repetitions` column. Helper functions made generic to preserve `TaskComplete` type through filtering.
+
 _Replace hardcoded data and localStorage with API-backed hooks and data fetching. Existing views continue to work but now use real data._
 
-- [ ] **2.1 Create `useCompletions` hook (replaces `useChecks`)**
+- [x] **2.1 Create `useCompletions` hook (replaces `useChecks`)**
   - Fetches completions for a given date from `GET /api/completions?date=...`
   - Provides: `isChecked(taskId)`, `getStatus(taskId)`, `markDone(taskId)`, `markNotDone(taskId)`, `undo(taskId)`, `completions` map
   - Calls POST /api/completions on mark, DELETE on undo
@@ -189,21 +191,21 @@ _Replace hardcoded data and localStorage with API-backed hooks and data fetching
   - Files: `lib/hooks/use-completions.ts`
   - Ref: Spec 08
 
-- [ ] **2.2 Create `useTasks` hook for fetching tasks from API**
+- [x] **2.2 Create `useTasks` hook for fetching tasks from API**
   - Fetches all tasks with recurrences from `GET /api/tasks`
   - Client-side caching with SWR or React Query (or simple useState + useEffect with revalidation)
   - Provides: `tasks`, `isLoading`, `error`, `mutate` (for optimistic updates after CRUD)
   - Files: `lib/hooks/use-tasks.ts`
   - Ref: Spec 02
 
-- [ ] **2.3 Update `lib/helpers.ts` to work with new types**
+- [x] **2.3 Update `lib/helpers.ts` to work with new types**
   - Rewrite `getTasksForDay`, `getTasksForDayAndPeriod` to accept TaskWithRecurrence[] and use recurrence resolution logic from `lib/recurrence.ts`
   - Update `filterByPerson`, `groupByCategory`, `getDayStats` signatures
   - Keep backward-compatible function signatures where possible
   - Files: `lib/helpers.ts`
   - Ref: Spec 03, Spec 04
 
-- [ ] **2.4 Update `app/home/page.tsx` to use API-backed hooks**
+- [x] **2.4 Update `app/home/page.tsx` to use API-backed hooks**
   - Replace `useChecks(selectedDay)` with `useCompletions(dateString)`
   - Replace hardcoded task imports with `useTasks()` hook
   - Convert day-of-week selection to actual date tracking (Date objects instead of just DayOfWeek)
@@ -212,7 +214,7 @@ _Replace hardcoded data and localStorage with API-backed hooks and data fetching
   - Files: `app/home/page.tsx`
   - Ref: Spec 04, Spec 08
 
-- [ ] **2.5 Update FocusView to use new data + 3-state completions**
+- [x] **2.5 Update FocusView to use new data + 3-state completions**
   - Accept tasks as props (from API) instead of importing from lib/tasks
   - Use `useCompletions` methods: `markDone`, `markNotDone`
   - Add "Nao feito" button (left, red/destructive styling)
@@ -222,7 +224,7 @@ _Replace hardcoded data and localStorage with API-backed hooks and data fetching
   - Files: `components/focus-view.tsx`
   - Ref: Spec 04, Spec 06
 
-- [ ] **2.6 Update TimelineView to use new data + 3-state checkboxes**
+- [x] **2.6 Update TimelineView to use new data + 3-state checkboxes**
   - Accept tasks as props (from API)
   - Replace binary toggle with 3-state cycle: pending -> done -> not_done -> pending
   - Visual states: empty checkbox (pending), green checkbox with checkmark (done), red checkbox with X (not_done)
@@ -230,21 +232,21 @@ _Replace hardcoded data and localStorage with API-backed hooks and data fetching
   - Files: `components/timeline-view.tsx`
   - Ref: Spec 04, Spec 06
 
-- [ ] **2.7 Update EmergencyView to fetch protocols from API**
+- [x] **2.7 Update EmergencyView to fetch protocols from API**
   - Replace `import { protocols }` with API fetch (GET /api/protocols)
   - Add loading state
   - Keep current card design
   - Files: `components/emergency-view.tsx`
   - Ref: Spec 07
 
-- [ ] **2.8 Update BacklogView to fetch tasks from API**
+- [x] **2.8 Update BacklogView to fetch tasks from API**
   - Replace hardcoded `tasks.filter(t => t.frequency === 'S')` with API-fetched tasks filtered by recurrence.type='none'
   - Add loading state
   - Keep current grouped-by-category display
   - Files: `components/backlog-view.tsx`
   - Ref: Spec 05
 
-- [ ] **2.9 Remove localStorage-based `useChecks` hook**
+- [x] **2.9 Remove localStorage-based `useChecks` hook**
   - Delete `lib/hooks.ts` (or remove useChecks export)
   - Ensure no component still imports it
   - Files: `lib/hooks.ts` (delete or clean)

@@ -38,6 +38,7 @@ export const tasks = pgTable('tasks', {
   category: categoryEnum('category').notNull(),
   primaryPerson: personEnum('primary_person').notNull(),
   secondaryPerson: personEnum('secondary_person'),
+  repetitions: text('repetitions'),
   planB: text('plan_b'),
   optional: boolean('optional').default(false).notNull(),
   sortOrder: integer('sort_order').default(0).notNull(),

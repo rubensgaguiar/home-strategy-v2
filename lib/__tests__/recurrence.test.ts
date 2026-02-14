@@ -26,6 +26,7 @@ function makeTask(
     category: 'casa' as const,
     primaryPerson: 'rubens' as const,
     secondaryPerson: null,
+    repetitions: null,
     planB: null,
     optional: false,
     sortOrder: 0,

@@ -222,6 +222,7 @@ async function seed() {
       category: categoryMap[t.category],
       primaryPerson: t.primary,
       secondaryPerson: t.secondary || null,
+      repetitions: t.repetitions || null,
       planB: t.planB || null,
       optional: t.optional || false,
       sortOrder: i,

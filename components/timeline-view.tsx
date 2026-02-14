@@ -1,24 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import { Task, Period, DayOfWeek, Person, Category } from '@/lib/types';
+import { TaskComplete, CompletionStatus, Period, Person } from '@/lib/types';
+import { categoryDisplayName } from '@/lib/types';
 import {
   PERIODS,
-  categoryIcon,
+  categoryDbIcon,
   getPersonStyle,
   getCurrentPeriod,
-  getTasksForDayAndPeriod,
-  filterByPerson,
-  getPlanB,
-  groupByCategory,
+  filterByPeriodDb,
+  filterByPersonDb,
+  groupByCategoryDb,
+  getPlanBDb,
 } from '@/lib/helpers';
 
 interface Props {
-  selectedDay: DayOfWeek;
+  tasks: TaskComplete[];
   isToday: boolean;
   person: Person | 'todos';
-  isChecked: (id: string) => boolean;
-  onToggle: (id: string) => void;
+  isChecked: (taskId: number) => boolean;
+  getStatus: (taskId: number) => CompletionStatus | null;
+  onMarkDone: (taskId: number) => void;
+  onMarkNotDone: (taskId: number) => void;
+  onUndo: (taskId: number) => void;
 }
 
 const periodAccent: Record<Period, { line: string; dot: string; header: string }> = {
@@ -39,10 +43,10 @@ const periodAccent: Record<Period, { line: string; dot: string; header: string }
   },
 };
 
-export function TimelineView({ selectedDay, isToday, person, isChecked, onToggle }: Props) {
+export function TimelineView({ tasks, isToday, person, isChecked, getStatus, onMarkDone, onMarkNotDone, onUndo }: Props) {
   const currentPeriod = isToday ? getCurrentPeriod() : null;
   const [collapsedPeriods, setCollapsedPeriods] = useState<Set<Period>>(new Set());
-  const [expandedPlanB, setExpandedPlanB] = useState<string | null>(null);
+  const [expandedPlanB, setExpandedPlanB] = useState<number | null>(null);
 
   function toggleCollapse(period: Period) {
     setCollapsedPeriods((prev) => {
@@ -53,12 +57,13 @@ export function TimelineView({ selectedDay, isToday, person, isChecked, onToggle
     });
   }
 
+  const personTasks = filterByPersonDb(tasks, person);
+
   return (
     <div className="space-y-3 stagger-children">
       {PERIODS.map((period) => {
-        const allTasks = getTasksForDayAndPeriod(selectedDay, period.id);
-        const periodTasks = filterByPerson(allTasks, person);
-        const grouped = groupByCategory(periodTasks);
+        const periodTasks = filterByPeriodDb(personTasks, period.id);
+        const grouped = groupByCategoryDb(periodTasks);
         const isCurrent = currentPeriod === period.id;
         const isCollapsed = collapsedPeriods.has(period.id);
         const accent = periodAccent[period.id];
@@ -123,38 +128,53 @@ export function TimelineView({ selectedDay, isToday, person, isChecked, onToggle
                     <p className="text-[12px] text-muted">Sem tarefas neste periodo</p>
                   </div>
                 )}
-                {grouped.map(({ category, items }, gi) => (
+                {grouped.map(({ category, displayName, items }, gi) => (
                   <div key={category} className={gi > 0 ? 'border-t border-border-subtle' : ''}>
                     {/* Category label */}
                     <div className="px-4 pt-2.5 pb-1 flex items-center gap-1.5">
-                      <span className="text-[11px]">{categoryIcon[category]}</span>
+                      <span className="text-[11px]">{categoryDbIcon[category]}</span>
                       <span className="text-[10px] font-semibold text-muted uppercase tracking-wider">
-                        {category}
+                        {displayName}
                       </span>
                     </div>
 
                     {/* Items */}
                     <div className="px-4 pb-2">
                       {items.map((task) => {
-                        const checked = isChecked(task.id);
-                        const ps = getPersonStyle(task.primary);
+                        const status = getStatus(task.id);
+                        const checked = status === 'done';
+                        const notDone = status === 'not_done';
+                        const ps = getPersonStyle(task.primaryPerson);
                         const planBExpanded = expandedPlanB === task.id;
 
                         return (
                           <div key={task.id} className="py-1.5">
                             <div className="flex items-center gap-2.5 group">
-                              {/* Checkbox */}
+                              {/* 3-state checkbox */}
                               <button
-                                onClick={() => onToggle(task.id)}
+                                onClick={() => {
+                                  if (status === null) {
+                                    onMarkDone(task.id);
+                                  } else {
+                                    onUndo(task.id);
+                                  }
+                                }}
                                 className={`shrink-0 w-[18px] h-[18px] rounded-md border-[1.5px] flex items-center justify-center transition-all duration-150 ${
                                   checked
                                     ? 'bg-accent border-accent animate-check-pop'
+                                    : notDone
+                                    ? 'bg-red-100 border-red-400 dark:bg-red-900/40 dark:border-red-500'
                                     : 'border-border hover:border-muted'
                                 }`}
                               >
                                 {checked && (
                                   <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3.5}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
+                                {notDone && (
+                                  <svg className="w-2.5 h-2.5 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                   </svg>
                                 )}
                               </button>
@@ -164,6 +184,8 @@ export function TimelineView({ selectedDay, isToday, person, isChecked, onToggle
                                 className={`text-[13px] flex-1 min-w-0 truncate leading-snug transition-all duration-200 ${
                                   checked
                                     ? 'text-muted line-through'
+                                    : notDone
+                                    ? 'text-red-400 dark:text-red-500 line-through'
                                     : task.optional
                                     ? 'text-muted italic'
                                     : 'text-foreground'
@@ -198,12 +220,31 @@ export function TimelineView({ selectedDay, isToday, person, isChecked, onToggle
                               </button>
                             </div>
 
+                            {/* Swipe actions for not-yet-completed tasks */}
+                            {status === null && (
+                              <div className="mt-1 ml-7 flex gap-1.5">
+                                <button
+                                  onClick={() => onMarkDone(task.id)}
+                                  className="text-[10px] font-medium text-accent hover:underline"
+                                >
+                                  Feito
+                                </button>
+                                <span className="text-border">·</span>
+                                <button
+                                  onClick={() => onMarkNotDone(task.id)}
+                                  className="text-[10px] font-medium text-red-500 dark:text-red-400 hover:underline"
+                                >
+                                  Nao feito
+                                </button>
+                              </div>
+                            )}
+
                             {/* Plan B content */}
                             {planBExpanded && (
                               <div className="mt-1.5 ml-7 animate-slide-down">
                                 <div className="px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200/30 dark:border-amber-800/20">
                                   <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed">
-                                    {getPlanB(task)}
+                                    {getPlanBDb(task)}
                                   </p>
                                 </div>
                               </div>

@@ -145,7 +145,7 @@ function taskAppearsOnDate(task: TaskWithRecurrence, target: Date): boolean {
  * Returns all tasks that should appear on the given date.
  * Pure function: accepts tasks as input, no DB dependency.
  */
-export function getTasksForDate(date: Date, tasks: TaskWithRecurrence[]): TaskWithRecurrence[] {
+export function getTasksForDate<T extends TaskWithRecurrence>(date: Date, tasks: T[]): T[] {
   return tasks.filter((task) => taskAppearsOnDate(task, date));
 }
 

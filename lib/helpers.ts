@@ -1,6 +1,10 @@
 import { tasks } from './tasks';
 import { contingencies } from './contingencies';
-import { Task, Period, DayOfWeek, Person, Category } from './types';
+import {
+  Task, Period, DayOfWeek, Person, Category,
+  TaskWithRecurrence, CategoryDb, categoryDisplayName,
+} from './types';
+import { getTasksForDate } from './recurrence';
 
 // ── Period config ──────────────────────────────────────────────
 
@@ -20,6 +24,16 @@ export const categoryIcon: Record<Category, string> = {
   Compras: '\u{1F6D2}',
   Pessoal: '\u{1F9D8}',
   Espiritual: '\u{1F54A}\uFE0F',
+};
+
+export const categoryDbIcon: Record<CategoryDb, string> = {
+  cozinha: '\u{1F373}',
+  pedro: '\u{1F466}',
+  ester: '\u{1F476}',
+  casa: '\u{1F3E0}',
+  compras: '\u{1F6D2}',
+  pessoal: '\u{1F9D8}',
+  espiritual: '\u{1F54A}\uFE0F',
 };
 
 // ── Person styles ──────────────────────────────────────────────
@@ -87,7 +101,83 @@ export function getGreeting(): string {
   return 'Boa noite';
 }
 
-// ── Task filtering ─────────────────────────────────────────────
+// ── Date helpers ───────────────────────────────────────────────
+
+export function formatDate(date: Date): string {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+export function getTodayDateStr(): string {
+  return formatDate(new Date());
+}
+
+export function getDateForDay(day: DayOfWeek): Date {
+  const today = new Date();
+  const todayJsDay = today.getDay();
+  const dayMap: Record<DayOfWeek, number> = {
+    domingo: 0, segunda: 1, terca: 2, quarta: 3,
+    quinta: 4, sexta: 5, sabado: 6,
+  };
+  const targetJsDay = dayMap[day];
+  const diff = targetJsDay - todayJsDay;
+  const date = new Date(today);
+  date.setDate(today.getDate() + diff);
+  return date;
+}
+
+// ── DB-type task filtering ─────────────────────────────────────
+
+export function getDbTasksForDate<T extends TaskWithRecurrence>(date: Date, allTasks: T[]): T[] {
+  return getTasksForDate(date, allTasks);
+}
+
+export function filterByPeriodDb<T extends TaskWithRecurrence>(taskList: T[], period: Period): T[] {
+  return taskList.filter((t) =>
+    t.recurrence.periods.includes(period)
+  );
+}
+
+export function filterByPersonDb<T extends TaskWithRecurrence>(taskList: T[], person: Person | 'todos'): T[] {
+  if (person === 'todos') return taskList;
+  return taskList.filter((t) => t.primaryPerson === person || t.primaryPerson === 'juntos');
+}
+
+export function groupByCategoryDb<T extends TaskWithRecurrence>(taskList: T[]): { category: CategoryDb; displayName: Category; items: T[] }[] {
+  const map = new Map<CategoryDb, T[]>();
+  for (const t of taskList) {
+    const list = map.get(t.category) ?? [];
+    list.push(t);
+    map.set(t.category, list);
+  }
+  return Array.from(map.entries()).map(([cat, items]) => ({
+    category: cat,
+    displayName: categoryDisplayName[cat],
+    items,
+  }));
+}
+
+export function getPlanBDb(task: TaskWithRecurrence): string {
+  if (task.planB) return task.planB;
+  const displayCat = categoryDisplayName[task.category];
+  const cat = contingencies.find((c) => c.category === displayCat);
+  return cat?.planB ?? 'Redistribua ou adie sem culpa.';
+}
+
+export function getDbDayStats<T extends TaskWithRecurrence>(
+  dateTasks: T[],
+  person: Person | 'todos',
+  isChecked: (taskId: number) => boolean
+) {
+  const filtered = filterByPersonDb(dateTasks, person);
+  const essential = filtered.filter((t) => !t.optional);
+  const done = essential.filter((t) => isChecked(t.id)).length;
+  return { total: essential.length, done, all: filtered.length };
+}
+
+// ── Legacy task filtering (kept for backward compat) ──────────
 
 export function getTasksForDay(day: DayOfWeek): Task[] {
   return tasks.filter((task) => {
@@ -109,15 +199,11 @@ export function filterByPerson(taskList: Task[], person: Person | 'todos'): Task
   return taskList.filter((t) => t.primary === person || t.primary === 'juntos');
 }
 
-// ── Plan B ─────────────────────────────────────────────────────
-
 export function getPlanB(task: Task): string {
   if (task.planB) return task.planB;
   const cat = contingencies.find((c) => c.category === task.category);
   return cat?.planB ?? 'Redistribua ou adie sem culpa.';
 }
-
-// ── Grouping ───────────────────────────────────────────────────
 
 export function groupByCategory(taskList: Task[]): { category: Category; items: Task[] }[] {
   const map = new Map<Category, Task[]>();
@@ -128,8 +214,6 @@ export function groupByCategory(taskList: Task[]): { category: Category; items: 
   }
   return Array.from(map.entries()).map(([category, items]) => ({ category, items }));
 }
-
-// ── Stats ──────────────────────────────────────────────────────
 
 export function getDayStats(day: DayOfWeek, person: Person | 'todos', isChecked: (id: string) => boolean) {
   const dayTasks = filterByPerson(getTasksForDay(day), person);

@@ -1,10 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { DayOfWeek, Person } from '@/lib/types';
-import { DAYS, DAY_SHORT, DAY_LABELS, getTodayDayOfWeek, getGreeting, getDayStats } from '@/lib/helpers';
-import { useChecks } from '@/lib/hooks';
+import {
+  DAYS, DAY_SHORT, DAY_LABELS, getTodayDayOfWeek, getGreeting,
+  getDateForDay, formatDate, getDbTasksForDate, filterByPersonDb, getDbDayStats,
+} from '@/lib/helpers';
+import { useTasks } from '@/lib/hooks/use-tasks';
+import { useCompletions } from '@/lib/hooks/use-completions';
 import { UserMenu } from '@/components/user-menu';
 import { FocusView } from '@/components/focus-view';
 import { TimelineView } from '@/components/timeline-view';
@@ -35,12 +39,26 @@ export default function HomePage() {
   const detectedPerson = useCurrentPerson();
   const [personFilter, setPersonFilter] = useState<PersonFilter>(detectedPerson ?? 'todos');
 
-  const { isChecked, check, toggle } = useChecks(selectedDay);
+  // API-backed data
+  const { tasks, isLoading: tasksLoading } = useTasks();
+  const selectedDate = getDateForDay(selectedDay);
+  const dateStr = formatDate(selectedDate);
+  const { isChecked, markDone, markNotDone, undo, getStatus } = useCompletions(dateStr);
+
   const isToday = selectedDay === todayDay;
   const greeting = getGreeting();
-  const stats = getDayStats(selectedDay, personFilter, isChecked);
-  const progressPct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
 
+  // Get tasks for selected date using recurrence logic
+  const dateTasks = useMemo(() => {
+    if (tasks.length === 0) return [];
+    return getDbTasksForDate(selectedDate, tasks);
+  }, [tasks, selectedDate]);
+
+  const stats = useMemo(() => {
+    return getDbDayStats(dateTasks, personFilter, isChecked);
+  }, [dateTasks, personFilter, isChecked]);
+
+  const progressPct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
   const personName = personFilter === 'rubens' ? 'Rubens' : personFilter === 'diene' ? 'Diene' : '';
 
   return (
@@ -66,10 +84,10 @@ export default function HomePage() {
           <div className="animate-fade-in">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[11px] font-medium text-muted">
-                {stats.done} de {stats.total} essenciais
+                {tasksLoading ? '...' : `${stats.done} de ${stats.total} essenciais`}
               </span>
               <span className="text-[11px] font-semibold text-accent tabular-nums">
-                {progressPct}%
+                {tasksLoading ? '...' : `${progressPct}%`}
               </span>
             </div>
             <div className="h-1 bg-border-subtle rounded-full overflow-hidden">
@@ -173,26 +191,36 @@ export default function HomePage() {
 
       {/* ── Content ───────────────────────────────────────────── */}
       <main className="px-5 pt-2 pb-4">
-        {activeTab === 'dia' && viewMode === 'foco' && (
+        {activeTab === 'dia' && tasksLoading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+        {activeTab === 'dia' && !tasksLoading && viewMode === 'foco' && (
           <FocusView
-            selectedDay={selectedDay}
+            tasks={dateTasks}
             isToday={isToday}
             person={personFilter}
             isChecked={isChecked}
-            onCheck={check}
+            getStatus={getStatus}
+            onMarkDone={markDone}
+            onMarkNotDone={markNotDone}
           />
         )}
-        {activeTab === 'dia' && viewMode === 'lista' && (
+        {activeTab === 'dia' && !tasksLoading && viewMode === 'lista' && (
           <TimelineView
-            selectedDay={selectedDay}
+            tasks={dateTasks}
             isToday={isToday}
             person={personFilter}
             isChecked={isChecked}
-            onToggle={toggle}
+            getStatus={getStatus}
+            onMarkDone={markDone}
+            onMarkNotDone={markNotDone}
+            onUndo={undo}
           />
         )}
         {activeTab === 'emergencia' && <EmergencyView />}
-        {activeTab === 'pendencias' && <BacklogView />}
+        {activeTab === 'pendencias' && <BacklogView tasks={tasks} isLoading={tasksLoading} />}
       </main>
 
       {/* ── Bottom Navigation ─────────────────────────────────── */}
@@ -212,7 +240,7 @@ export default function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             )},
-            { id: 'pendencias' as Tab, label: 'Pendencias', icon: (active: boolean) => (
+            { id: 'pendencias' as Tab, label: 'Backlog', icon: (active: boolean) => (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={active ? 2 : 1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
